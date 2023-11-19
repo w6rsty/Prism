@@ -18,6 +18,7 @@ public:
     ~Texture();
     void Bind(unsigned int slot = 0) const;
     void Unbind() const;
+    inline static void Reset() { glActiveTexture(GL_TEXTURE0); }
 };
 
 inline void createCheckboardTexture(unsigned char* textureBuffer, int width, int height, int tileSize) {

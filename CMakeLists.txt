@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.26)
 
 project(Prsim LANGUAGES CXX C)
 
@@ -23,3 +23,4 @@ target_include_directories(main PUBLIC 3rdlibs/imgui)
 target_include_directories(main PUBLIC 3rdlibs/glad/include)
 target_include_directories(main PUBLIC 3rdlibs/glm)
 target_include_directories(main PUBLIC 3rdlibs/pecs/include)
+target_include_directories(main PUBLIC 3rdlibs/assimp/include)

@@ -19,6 +19,7 @@
 #include "ui.hpp"
 #include "scene.hpp"
 #include "shader_program.hpp"
+#include "model.hpp"
 
 #define UINEXT ImGui::SameLine();
 #define UIDIVIDER ImGui::Separator();
@@ -34,8 +35,10 @@
 #define pureFragPath "../resources/shader/pure_frag.glsl"
 #define colorVertexPath "../resources/shader/color_vertex.glsl"
 #define colorFragPath "../resources/shader/color_frag.glsl"
-#define meshVertexPath "../resources/shader/mesh_vertex.glsl"
-#define meshFragPath "../resources/shader/mesh_frag.glsl"
+
+#define meshVertexPath "../resources/shader/mesh_frag.glsl"
+#define meshFragPath "../resources/shader/mesh_vertex.glsl"
+
 #define texPath "../resources/img/image.png"
 #define fontPath1 "../resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
 #define fontPath2 "../resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
@@ -66,6 +69,7 @@ private:
     std::unordered_map<std::string, IndexBuffer*>   _ibos;
     std::unordered_map<std::string, Texture*>       _texs;
     std::unordered_map<std::string, ShaderProgram>  _shaders;
+    std::unordered_map<std::string, pmodel::Model*>  _models;
     float _lightColor[3];
     float _lightPos[3];
 
@@ -73,15 +77,11 @@ private:
     bool _is_editing;
     ShaderType _current_shader_src;
 
-    float _clear_color;
-    std::string _shader_program;
-
     bool _axis_mode;
     bool _show_demo;
     bool _show_editor;
     bool _should_cull;
     unsigned int _front_face;
-    bool _modify_presicion;
 
     friend class UI;
     UI* _ui;
@@ -93,8 +93,6 @@ private:
     };
 
     int _theme = Theme::Dark;
-    float _color[3];
-    bool _use_color;
 
     std::unordered_map<std::string, ImFont*> _fonts;
     std::vector<const char*> _shader_sources = {
@@ -108,7 +106,7 @@ private:
         colorVertexPath,
         colorFragPath,
         meshVertexPath,
-        meshFragPath,
+        meshFragPath
     };
 public:
     Renderer(int w, int h, const char* name);

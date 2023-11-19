@@ -50,16 +50,6 @@ void UI::imguiGLSLEditor() {
     ImGui::SetNextWindowSize(ImVec2((float)_rd->_width / 2.0, (float)_rd->_height / 2.0));
     ImGui::Begin("GLSL Editor", NULL, ImGuiWindowFlags_NoResize);
 
-    static int program_current  = 0;
-    const char* names[] = {"pure", "geo", "color"};
-    if (ImGui::Combo("Program", &program_current, names, std::size(names))) {
-        _rd->_shader_program = names[program_current];
-    }
-
-    if (_rd->_use_color) {
-        imguiColorSelector(_rd->_color);
-    }
-
     static int item_current = 0;
     ImGui::Combo("File", &item_current, _rd->_shader_sources.data(), _rd->_shader_sources.size()); UINEXT
     if (item_current != 0) {
@@ -134,7 +124,3 @@ void UI::imguiMainTabBar() {
         ImGui::EndMainMenuBar();
     }
 }
-
- void UI::imguiColorSelector(float* color) {
-    ImGui::ColorEdit3("", _rd->_color);
- }

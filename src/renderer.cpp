@@ -1,9 +1,13 @@
 #include "renderer.hpp"
 #include "GLFW/glfw3.h"
 #include "geo.hpp"
+#include "index_buffer.hpp"
 #include "shader_program.hpp"
 #include "texture.hpp"
 #include <string>
+#include "model.hpp"
+#include "vertex_array.hpp"
+#include "vertex_buffer.hpp"
 
 Renderer::Renderer(int w, int h, const char* name)
     : _width(w), _height(h), _name(name)
@@ -13,10 +17,8 @@ Renderer::Renderer(int w, int h, const char* name)
     _axis_mode = false;
     _show_demo = false;
     _show_editor = false;
-    _modify_presicion = false;
     _should_cull = false;
     _front_face = GL_CCW;
-    _shader_program = "pure";
 
     _first_mouse = false;
     _delta_time = 0.0f;
@@ -24,12 +26,7 @@ Renderer::Renderer(int w, int h, const char* name)
     _last_x = _width / 2.0f;
     _last_y = _height / 2.0f;
 
-    _color[0] = 1.0;
-    _color[1] = 1.0;
-    _color[2] = 1.0;
-    _use_color = false;
-
-    _camera = new Camera(glm::vec3(0.0, 0.0, 3.0f));
+    _camera = new Camera(glm::vec3(0.0, 0.0, 5.0f));
 }
 
 Renderer::~Renderer() {
@@ -90,61 +87,50 @@ bool Renderer::init() {
     _ui = new UI(this); 
 
     axisShader();
+    
+    {
+        std::string path[] = {
+            "../resources/shader/mesh_vertex.glsl",
+            "../resources/shader/mesh_frag.glsl",
+        };
+        _shaders["mesh"] = ShaderProgram {
+            "mesh",
+            ShaderProgramType::Mesh,
+            new Shader(path)
+        };
+    }
 
     {
-        Geo* cube = new Sphere();
+        std::string path = "../resources/model/nanosuit/nanosuit.obj";
+        auto model = _models["backpack"] = new pmodel::Model(path);
+    }
 
-        _geos["geos"] = cube;
-        _vaos["cube"] = new VertexArray();
-        _vbos["cube"] = new VertexBuffer(cube->getVertices(), cube->getSize());
-        _ibos["cube"] = new IndexBuffer(cube->getIndices(), cube->getCount());
-
+    {
+        auto ptr = _geos["cube"] = new Cube();
+        auto vao = _vaos["cube"] = new VertexArray;
+        auto vbo = _vbos["cube"] = new VertexBuffer(ptr->getVertices(), ptr->getSize());
+        _ibos["cube"] = new IndexBuffer(ptr->getIndices(), ptr->getCount());
         VertexBufferLayout layout;
         layout.push_float(3);
-        layout.push_float(2);
         layout.push_float(3);
-        _vaos["cube"]->addBuffer(*_vbos["cube"], layout);
-        
-        auto tex_data = new unsigned char[2048 * 1024 * 3];
-        createCheckboardTexture(tex_data, 2048, 1024, 16);
-        Texture* tex = new Texture(2048, 1024, tex_data);
-        
-        _texs["tex"] = tex;
-        
-        std::string paths[] = {vertexPath, fragPath};
-        _shaders["geo"] = ShaderProgram{
-            .name = "geo",
-            .type = ShaderProgramType::Tex_Normal,
-            .shader = new Shader(paths)
-        };
-
-        _lightColor[0] = 1.0f;
-        _lightColor[1] = 1.0f;
-        _lightColor[2] = 1.0f;
-        _lightPos[0] = 3.0f;
-        _lightPos[1] = 3.0f;
-        _lightPos[2] = 3.0f;   
+        layout.push_float(2);
+        vao->addBuffer(*vbo, layout);
     }
 
-    {
-        std::string paths[] = {pureVertexPath, pureFragPath};
-        _shaders["pure"] = ShaderProgram {
-            .name = "pure",
-            .type = ShaderProgramType::Pure,
-            .shader = new Shader(paths),
-        };
-    }
-    {
-        std::string paths[] = {colorVertexPath, colorFragPath};
-        _shaders["color"] = ShaderProgram {
-            .name = "color",
-            .type = ShaderProgramType::Color,
-            .shader = new Shader(paths),
-        };
-    }
+
+    _lightColor[0] = 1.0f;
+    _lightColor[1] = 1.0f;
+    _lightColor[2] = 1.0f;
+    _lightPos[0] = 3.0f;
+    _lightPos[1] = 3.0f;
+    _lightPos[2] = 3.0f;   
 
     _ui->initEditor();
     _ui->imguiInit();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glClearColor(0.1, 0.1, 0.1, 1.0);
     return true;
 }
 
@@ -156,7 +142,6 @@ void Renderer::run() {
         _last_time= currentFrame;
 
         // Buffer Clear
-        glClearColor(0, 0, 0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
         if (_should_cull) {
@@ -164,8 +149,6 @@ void Renderer::run() {
         } else {
             glDisable(GL_CULL_FACE);
         }
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
 
         processInput(_window);
 
@@ -175,36 +158,21 @@ void Renderer::run() {
 
         _ui->imguiLayout();
 
-
         _vMat = glm::perspective(glm::radians(_camera->Zoom), _aspect, 0.1f, 1000.0f);
         auto view = _camera->GetViewMatrix();
 
         {
-            ShaderProgram& program = _shaders[_shader_program];
-            program.shader->Bind();
-            _ibos["cube"]->Bind();
-            _vaos["cube"]->Bind();
-
-            if (program.type == ShaderProgramType::Tex_Normal || program.type == ShaderProgramType::Color) {
-                _texs["tex"]->Bind(0);
-                program.shader->setUniform1i("samp", 0);
-                program.shader->setUniform3f("lightColor", _lightColor[0], _lightColor[1], _lightColor[2]);
-                program.shader->setUniform3f("lightPos", _lightPos[0], _lightPos[1], _lightPos[2]);
-                program.shader->setUniform3f("viewPos", _camera->Position.x, _camera->Position.y, _camera->Position.z);
-            }
-            
-            if (program.type == ShaderProgramType::Color) {
-                _use_color = true;
-                program.shader->setUniform3f("tex_color", _color[0], _color[1], _color[2]);
-            } else { _use_color = false; }
-
-            program.shader->setUniformMat4f("proj_matrix", _vMat);
-            program.shader->setUniformMat4f("view_matrix", view);
-            glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 1));
-            program.shader->setUniformMat4f("model_matrix", mMat);
-
-            glDrawElements(GL_TRIANGLES, _geos["geos"]->getCount(), GL_UNSIGNED_INT, 0);
+            auto& shader = *_shaders["mesh"].shader;
+            shader.Bind();
+            shader.setUniformMat4f("proj_matrix", _vMat);
+            shader.setUniformMat4f("view_matrix", view);
+            glm::mat4 mMat = glm::mat4(1.0f);
+            shader.setUniformMat4f("model_matrix", mMat);
+  
+            auto& model = *_models["backpack"];
+            model.Draw(shader);
         }
+
 
         if (_axis_mode) {
             drawAxis(view);
@@ -268,9 +236,9 @@ void Renderer::axisShader() {
     _vaos["axis"]->addBuffer(*_vbos["axis"], axis_layout);
     std::string axis[] = {axisVertexPath, axisFragPath};
     _shaders["axis"] = ShaderProgram {
-        .name = "axis",
-        .type = ShaderProgramType::Axis,
-        .shader = new Shader(axis),
+        "axis",
+        ShaderProgramType::Axis,
+        new Shader(axis),
     };
     _vbos["axis"]->Unbind();
     _vaos["axis"]->Unbind();

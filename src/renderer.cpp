@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "GLFW/glfw3.h"
+#include "error.hpp"
 #include "geo.hpp"
 #include "index_buffer.hpp"
 #include "shader_program.hpp"
@@ -128,9 +129,9 @@ bool Renderer::init() {
     _ui->initEditor();
     _ui->imguiInit();
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glClearColor(0.1, 0.1, 0.1, 1.0);
+    GLCall(glEnable(GL_DEPTH_TEST));
+    GLCall(glDepthFunc(GL_LESS));
+    GLCall(glClearColor(0.1, 0.1, 0.1, 1.0));
     return true;
 }
 
@@ -142,12 +143,12 @@ void Renderer::run() {
         _last_time= currentFrame;
 
         // Buffer Clear
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        GLCall(glClear(GL_DEPTH_BUFFER_BIT));
         if (_should_cull) {
-            glEnable(GL_CULL_FACE);
+            GLCall(glEnable(GL_CULL_FACE));
         } else {
-            glDisable(GL_CULL_FACE);
+            GLCall(glDisable(GL_CULL_FACE));
         }
 
         processInput(_window);

@@ -3,6 +3,26 @@
 #include "error.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
+
+#define ASSERT(x) if (!(x)) assert(x);
+
+#define GLCall(x) x; do { \
+    GLClearError(); \
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__)); \
+} while (0)
+
+inline void GLClearError() {
+    while (glGetError() != GL_NO_ERROR);
+}
+
+inline bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glad_glGetError()) {
+        std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
+        return false;
+    }
+    return true;
+}
 
 inline void printShaderLog(unsigned int shader) {
     int len = 0;

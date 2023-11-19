@@ -1,23 +1,24 @@
 #include "vertex_buffer.hpp"
+#include "error.hpp"
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size) {
-    glGenBuffers(1, &buffer_id);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &buffer_id));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer_id));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
 }
 
 void VertexBuffer::update(const void* data, unsigned int size) {
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW));
 }
 
 VertexBuffer::~VertexBuffer() {
-    glDeleteBuffers(1, &buffer_id);
+    GLCall(glDeleteBuffers(1, &buffer_id));
 }
 
 void VertexBuffer::Bind() const {
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer_id));
 }
 
 void VertexBuffer::Unbind() const {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }

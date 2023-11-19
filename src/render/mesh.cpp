@@ -31,9 +31,9 @@ void  Mesh::Draw(Shader& shader) {
         textures_[i].ptr->Bind(i);
     }
     vao_->Bind();
-    glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, 0);
+    GLCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, 0));
     vao_->Unbind();
-    glActiveTexture(GL_TEXTURE0);
+    GLCall(glActiveTexture(GL_TEXTURE0));
 }
 
 void Mesh::setupMesh() {
@@ -48,6 +48,7 @@ void Mesh::setupMesh() {
     // layout.push_float(3);
     // layout.push_float(3);
     vao_->addBuffer(*vbo_, layout);
+    //vao_->Unbind();
 }
 
 }

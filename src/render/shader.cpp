@@ -1,5 +1,6 @@
 #include "shader.hpp"
 
+#include "error.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <fstream>
@@ -71,14 +72,14 @@ unsigned int Shader::program() {
 }
 
 void Shader::Bind() const {
-    glUseProgram(renderer_id);
+    GLCall(glUseProgram(renderer_id));
 }
 void Shader::Unbind() const {
-    glUseProgram(0);
+    GLCall(glUseProgram(0));
 }
 
 Shader::~Shader() {
-    glDeleteProgram(renderer_id);
+    GLCall(glDeleteProgram(renderer_id));
 }
 
 int Shader::getUniformLocation(const std::string& name) {
@@ -95,20 +96,20 @@ int Shader::getUniformLocation(const std::string& name) {
 }
 
 void Shader::setUniform1i(const std::string& name, int value) {
-    glUniform1i(getUniformLocation(name), value);
+    GLCall(glUniform1i(getUniformLocation(name), value));
 }
 
 void Shader::setUniform1f(const std::string& name, float value) {
-    glUniform1f(getUniformLocation(name), value);
+    GLCall(glUniform1f(getUniformLocation(name), value));
 }
 
 void Shader::setUniform2f(const std::string& name, float v0, float v1) {
-    glUniform2f(getUniformLocation(name), v0, v1);
+    GLCall(glUniform2f(getUniformLocation(name), v0, v1));
 }
 
 void Shader::setUniform3f(const std::string& name, float v0, float v1, float v2) {
-    glUniform3f(getUniformLocation(name), v0, v1, v2);
+    GLCall(glUniform3f(getUniformLocation(name), v0, v1, v2));
 }
 void Shader::setUniformMat4f(const std::string& name, glm::mat4& mat) {
-    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+    GLCall(glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat)));
 }

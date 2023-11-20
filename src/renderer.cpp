@@ -2,7 +2,6 @@
 #include "GLFW/glfw3.h"
 #include <memory>
 #include <string>
-#include "geo.hpp"
 #include "error.hpp"
 #include "model.hpp"
 #include "shader.hpp"
@@ -21,8 +20,9 @@ Renderer::Renderer(int w, int h, const char* name)
     _aspect = (float)_width / (float)_height;
     _frame_mode = false;
     _axis_mode = false;
-    _show_demo = false;
     _should_cull = false;
+    _show_demo = false;
+    show_debug_ = false;
 
     _first_mouse = false;
     _delta_time = 0.0f;
@@ -93,7 +93,6 @@ bool Renderer::init() {
     glfwSetCursorPosCallback(_window, mouse_func);
     glfwSetScrollCallback(_window, scroll_func);
 
-
     _ui = new UI(this); 
 
     initShaders();
@@ -112,7 +111,7 @@ bool Renderer::init() {
 
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glDepthFunc(GL_LESS));
-    GLCall(glClearColor(0.1, 0.1, 0.1, 1.0));
+    GLCall(glClearColor(0.7, 0.7, 0.7, 1.0));
     return true;
 }
 
@@ -146,14 +145,15 @@ void Renderer::run() {
         {
             auto& shader = *shaders_["mesh"].shader;
             shader.Bind();
+            auto& cpos = _camera->Position;
+            shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
             shader.setUniformMat4f("proj_matrix", _vMat);
             shader.setUniformMat4f("view_matrix", view);
-            glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.2));
-            mMat = glm::rotate(mMat, (float)glfwGetTime(), glm::vec3(0, 1, 0));
-            shader.setUniformMat4f("model_matrix", mMat);
             for (const auto& model : models_) {
-                if (model.second) {
-                    model.second->Draw(shader);
+                if (model.second.ptr) {
+                    glm::mat4 mMat = globalTransform_ * model.second.mMat;
+                    shader.setUniformMat4f("model_matrix", mMat);
+                    model.second.ptr->Draw(shader);
                 }
             }
         }
@@ -273,7 +273,10 @@ void Renderer::createShader(CreateShaderInfo info) {
 
 void Renderer::initModels() {
     for (const auto& info : createModelInfos_) {
-        models_[info.name] = std::make_shared<pmodel::Model>(info.modelPath, info.flip);
+        models_[info.name] = ModelRenderInfo {
+            std::make_shared<pmodel::Model>(info.modelPath, info.flip),
+            info.mMat
+        };
     }
     createModelInfos_.clear();
 }

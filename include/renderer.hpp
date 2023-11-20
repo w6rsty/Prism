@@ -14,9 +14,7 @@
 #include "vertex_buffer.hpp"
 #include "texture.hpp"
 #include "shader.hpp"
-#include "anim.hpp"
 #include "ui.hpp"
-#include "scene.hpp"
 #include "shader_program.hpp"
 #include "model.hpp"
 #include <memory>
@@ -26,17 +24,18 @@
 #define UINEXT ImGui::SameLine();
 #define UIDIVIDER ImGui::Separator();
 
-#define axisVertexPath "../resources/shader/axis_vertex.glsl"
-#define axisFragPath "../resources/shader/axis_frag.glsl"
+#define axisVertexPath "D:/home/Prism/resources/shader/axis_vertex.glsl"
+#define axisFragPath "D:/home/Prism/resources/shader/axis_frag.glsl"
 
-#define texPath "../resources/img/image.png"
-#define fontPath1 "../resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
-#define fontPath2 "../resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
+#define texPath "D:/home/Prism/resources/img/image.png"
+#define fontPath1 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
+#define fontPath2 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
 
 struct CreateModelInfo {
     const char* name;
     const char* modelPath;
     bool flip;
+    glm::mat4 mMat = glm::mat4(1.0f);
 };
 
 struct CreateShaderInfo {
@@ -73,18 +72,25 @@ private:
     std::vector<CreateModelInfo> createModelInfos_; 
     std::vector<CreateShaderInfo> createShaderInfos_; 
 
+    glm::mat4 globalTransform_ = glm::mat4(1.0f);
+
     std::unordered_map<std::string, ShaderProgram>  shaders_;
-    std::unordered_map<std::string, std::shared_ptr<pmodel::Model>>  models_;
+    struct ModelRenderInfo {
+        std::shared_ptr<pmodel::Model> ptr;
+        glm::mat4 mMat;
+    };
+    std::unordered_map<std::string, ModelRenderInfo>  models_;
 
     float _lightColor[3];
     float _lightPos[3];
 
     bool _axis_mode;
-    bool _show_demo;
     bool _should_cull;
 
     friend class UI;
     UI* _ui;
+    bool _show_demo;
+    bool show_debug_;
 
     enum Theme {
         Light =  0,
@@ -109,6 +115,8 @@ public:
 
     void createModel(CreateModelInfo info);
     void createShader(CreateShaderInfo info);
+
+    inline void setGlobalTransform(glm::mat4 mat) { globalTransform_ = mat; }
 private:
     void initModels();
     void initShaders();

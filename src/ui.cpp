@@ -33,15 +33,18 @@ void UI::imguiInit() {
 
 void UI::imguiLayout() {
     imguiMainTabBar();
-    if ( _rd->_show_demo) ImGui::ShowDemoWindow();
+    if (_rd->_show_demo) ImGui::ShowDemoWindow();
+    if (_rd->show_debug_) imguiDebugPanel();
 }
 
 
 void UI::imguiDebugPanel() {
     float tab_height = ImGui::GetTextLineHeightWithSpacing();
-    ImGui::SetNextWindowPos(ImVec2((float)_rd->_width / 2.0, tab_height));
-    ImGui::SetNextWindowSize(ImVec2((float)_rd->_width / 2.0, (float)_rd->_height / 2.0));
+    ImGui::SetNextWindowPos(ImVec2(0, tab_height));
+    ImGui::SetNextWindowSize(ImVec2((float)_rd->_width / 4.0, (float)_rd->_height));
     ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize);
+    auto& cpos = _rd->_camera->Position;
+    ImGui::Text("cam pos: (%.3f %.3f %.3f)", cpos.x, cpos.y, cpos.z);
 
     ImGui::End();
 }
@@ -82,6 +85,9 @@ void UI::imguiMainTabBar() {
             }
             if (ImGui::MenuItem("Face Cull", _rd->_should_cull ? "*" : "")) {
                 _rd->toggle(&_rd->_should_cull);
+            }
+            if (ImGui::MenuItem("Show debug", _rd->show_debug_ ? "*" : "")) {
+                _rd->toggle(&_rd->show_debug_);
             }
             ImGui::EndMenu();
         }

@@ -5,7 +5,7 @@ project(Prsim LANGUAGES CXX C)
 aux_source_directory(src/ SRC)
 aux_source_directory(src/render SRC)
 
-add_executable(engine ${SRC})
+add_library(engine STATIC ${SRC})
 set(EXPORT_COMPILE_COMMANDS ON)
 
 target_compile_features(engine PRIVATE cxx_std_17)
@@ -24,3 +24,5 @@ target_include_directories(engine PUBLIC 3rdlibs/glad/include)
 target_include_directories(engine PUBLIC 3rdlibs/glm)
 target_include_directories(engine PUBLIC 3rdlibs/pecs/include)
 target_include_directories(engine PUBLIC 3rdlibs/assimp/include)
+
+add_subdirectory(sandbox)

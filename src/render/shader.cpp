@@ -7,9 +7,11 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(std::string* filePaths)
-    : file_paths(filePaths), renderer_id(0) 
+Shader::Shader(const char* vs, const char* fs)
+    : renderer_id(0) 
 {
+    file_paths[0] = vs;
+    file_paths[1] = fs;
     renderer_id = createShader();
 }
 
@@ -36,7 +38,7 @@ unsigned int Shader::compileShader(unsigned int type, const char* source, Shader
             std::cout << "\x1b[31;1mVertex Shader compilation failed\x1b[0m" << std::endl;
         else
             std::cout << "\x1b[31;1mFragment Shader compilation failed\x1b[0m" << std::endl;
-    printShaderLog(id);
+        printShaderLog(id);
     }
     return id;
 }

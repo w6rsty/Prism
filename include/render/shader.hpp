@@ -20,14 +20,14 @@ enum ShaderType {
 class Shader final {
 private:
     unsigned int renderer_id;
-    std::string* file_paths;
+    std::string file_paths[2];
     std::unordered_map<std::string, int> uniform_cache;
 private:
     unsigned int compileShader(unsigned int type, const char* source, ShaderType s_type);
     unsigned int createShader();
     int getUniformLocation(const std::string& name);
 public:
-    Shader(std::string* filePaths);
+    Shader(const char* vs, const char* fs);
     ~Shader();
     unsigned int program();
     void Bind() const;

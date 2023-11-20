@@ -17,10 +17,11 @@ void VertexArray::addBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
     const auto& elements = layout.getElement();
     for (unsigned int i = 0; i < elements.size(); i++) {
         const auto& element = elements[i];
-        GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.getStride(), (const void*)offset));
+        GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.getStride(), (void*)offset));
         GLCall(glEnableVertexAttribArray(i));
         offset += element.count * VertexBufferElement::getSize(element.type);
     }
+    GLCall(glEnableVertexAttribArray(0));
 }
 
 void VertexArray::Bind() const {

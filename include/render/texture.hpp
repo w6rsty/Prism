@@ -12,8 +12,9 @@ private:
     std::string file_path;
     unsigned char* data;
     int width, height, BPP;
+    bool flip_;
 public:
-    Texture(const std::string& filePath);
+    Texture(const std::string& filePath, bool flip = true);
     Texture(int width, int height, const unsigned char* data);
     ~Texture();
     void Bind(unsigned int slot = 0) const;

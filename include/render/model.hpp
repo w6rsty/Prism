@@ -15,8 +15,10 @@ public:
     std::vector<TextureInfo> textures_;
     std::vector<std::shared_ptr<Mesh>> meshes_;
     std::string directory_;
+private:
+    bool flip_;
 public:
-    Model(const std::string& path);
+    Model(const std::string& path, bool flip = true);
     void Draw(Shader& shader);
 private:
     void loadModel(const std::string& path);
@@ -25,7 +27,7 @@ private:
     std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
-std::shared_ptr<Texture> loadTextureFromFile(const char* path, const std::string& directory); 
+std::shared_ptr<Texture> loadTextureFromFile(const char* path, const std::string& directory, bool flip = true); 
 
 }
 

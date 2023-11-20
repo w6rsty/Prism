@@ -8,7 +8,6 @@
 #include "imgui_impl_opengl3.h"
 
 #include "camera.hpp"
-#include "geo.hpp"
 #include "renderer.hpp"
 #include "vertex_array.hpp"
 #include "index_buffer.hpp"
@@ -20,28 +19,31 @@
 #include "scene.hpp"
 #include "shader_program.hpp"
 #include "model.hpp"
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 #define UINEXT ImGui::SameLine();
 #define UIDIVIDER ImGui::Separator();
 
-#define DISPLAY_BUFFER_SIZE 1024
-#define EDITOR_BUFFER_SIZE 2048
-
-#define vertexPath "../resources/shader/vertex.glsl"
-#define fragPath "../resources/shader/frag.glsl"
 #define axisVertexPath "../resources/shader/axis_vertex.glsl"
 #define axisFragPath "../resources/shader/axis_frag.glsl"
-#define pureVertexPath "../resources/shader/pure_vertex.glsl"
-#define pureFragPath "../resources/shader/pure_frag.glsl"
-#define colorVertexPath "../resources/shader/color_vertex.glsl"
-#define colorFragPath "../resources/shader/color_frag.glsl"
-
-#define meshVertexPath "../resources/shader/mesh_frag.glsl"
-#define meshFragPath "../resources/shader/mesh_vertex.glsl"
 
 #define texPath "../resources/img/image.png"
 #define fontPath1 "../resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
 #define fontPath2 "../resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
+
+struct CreateModelInfo {
+    const char* name;
+    const char* modelPath;
+    bool flip;
+};
+
+struct CreateShaderInfo {
+    const char* name;
+    const char* vsPath;
+    const char* fsPath;
+};
 
 class UI;
 
@@ -63,25 +65,23 @@ private:
     float _delta_time;
     float _last_time;
     float _last_x, _last_y;
-    std::unordered_map<std::string, Geo*>           _geos;
     std::unordered_map<std::string, VertexArray*>   _vaos;
     std::unordered_map<std::string, VertexBuffer*>  _vbos;
     std::unordered_map<std::string, IndexBuffer*>   _ibos;
     std::unordered_map<std::string, Texture*>       _texs;
-    std::unordered_map<std::string, ShaderProgram>  _shaders;
-    std::unordered_map<std::string, pmodel::Model*>  _models;
+
+    std::vector<CreateModelInfo> createModelInfos_; 
+    std::vector<CreateShaderInfo> createShaderInfos_; 
+
+    std::unordered_map<std::string, ShaderProgram>  shaders_;
+    std::unordered_map<std::string, std::shared_ptr<pmodel::Model>>  models_;
+
     float _lightColor[3];
     float _lightPos[3];
 
-    char _editor_buffer[EDITOR_BUFFER_SIZE];
-    bool _is_editing;
-    ShaderType _current_shader_src;
-
     bool _axis_mode;
     bool _show_demo;
-    bool _show_editor;
     bool _should_cull;
-    unsigned int _front_face;
 
     friend class UI;
     UI* _ui;
@@ -95,19 +95,6 @@ private:
     int _theme = Theme::Dark;
 
     std::unordered_map<std::string, ImFont*> _fonts;
-    std::vector<const char*> _shader_sources = {
-        "none",
-        vertexPath, 
-        fragPath, 
-        axisVertexPath,
-        axisFragPath,
-        pureVertexPath,
-        pureFragPath,
-        colorVertexPath,
-        colorFragPath,
-        meshVertexPath,
-        meshFragPath
-    };
 public:
     Renderer(int w, int h, const char* name);
     ~Renderer();
@@ -118,8 +105,14 @@ public:
 
     inline int width() const { return _width; }
     inline int height() const { return _height; }
+    inline void setCamera(Camera* camera) { _camera = camera; }
 
+    void createModel(CreateModelInfo info);
+    void createShader(CreateShaderInfo info);
 private:
+    void initModels();
+    void initShaders();
+
     void processInput(GLFWwindow *window);
     void toggleFrameMode();
     void toggle(bool* value);

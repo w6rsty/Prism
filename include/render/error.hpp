@@ -9,6 +9,7 @@
 
 #define GLCall(x) x; do { \
     GLClearError(); \
+    x; \
     ASSERT(GLLogCall(#x, __FILE__, __LINE__)); \
 } while (0)
 

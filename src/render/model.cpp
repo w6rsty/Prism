@@ -7,7 +7,9 @@
 
 namespace pmodel {
 
-Model::Model(const std::string& path) {
+Model::Model(const std::string& path, bool flip)
+    : flip_(flip)
+{
     loadModel(path);
 }
 void Model::Draw(Shader& shader) {
@@ -18,7 +20,11 @@ void Model::Draw(Shader& shader) {
 
 void Model::loadModel(const std::string& path) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    unsigned int flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
+    if (!flip_) {
+        flags |= aiProcess_FlipUVs; 
+    }
+    const aiScene* scene = importer.ReadFile(path, flags);
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
         return;
@@ -71,16 +77,16 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 vec.x = mesh->mTextureCoords[0][i].x; 
                 vec.y = mesh->mTextureCoords[0][i].y;
                 vertex.texCoords = vec;
-                // // tangent
-                // vector.x = mesh->mTangents[i].x;
-                // vector.y = mesh->mTangents[i].y;
-                // vector.z = mesh->mTangents[i].z;
-                // vertex.tangent = vector;
-                // // bitangent
-                // vector.x = mesh->mBitangents[i].x;
-                // vector.y = mesh->mBitangents[i].y;
-                // vector.z = mesh->mBitangents[i].z;
-                // vertex.bitTangent = vector;
+                // tangent
+                vector.x = mesh->mTangents[i].x;
+                vector.y = mesh->mTangents[i].y;
+                vector.z = mesh->mTangents[i].z;
+                vertex.tangent = vector;
+                // bitangent
+                vector.x = mesh->mBitangents[i].x;
+                vector.y = mesh->mBitangents[i].y;
+                vector.z = mesh->mBitangents[i].z;
+                vertex.bitTangent = vector;
             }
             else {
                 vertex.texCoords = glm::vec2(0.0f, 0.0f);
@@ -147,10 +153,10 @@ std::vector<TextureInfo> Model::loadMaterialTextures(aiMaterial* mat, aiTextureT
 }
 
 
-std::shared_ptr<Texture> loadTextureFromFile(const char* path, const std::string& directory) {
+std::shared_ptr<Texture> loadTextureFromFile(const char* path, const std::string& directory, bool flip) {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
-    return std::make_shared<Texture>(filename);
+    return std::make_shared<Texture>(filename, flip);
 }
 
 }

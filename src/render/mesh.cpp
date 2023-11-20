@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include "error.hpp"
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include <memory>
@@ -30,25 +31,34 @@ void  Mesh::Draw(Shader& shader) {
         shader.setUniform1i((name + number), i);
         textures_[i].ptr->Bind(i);
     }
-    vao_->Bind();
-    GLCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, 0));
-    vao_->Unbind();
+    GLCall(glBindVertexArray(vao_));
+    GLCall(glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices_.size()), GL_UNSIGNED_INT, 0));
+    GLCall(glBindVertexArray(vao_));
     GLCall(glActiveTexture(GL_TEXTURE0));
 }
 
 void Mesh::setupMesh() {
-    vao_ = std::make_shared<VertexArray>();
-    vbo_ = std::make_shared<VertexBuffer>(&vertices_[0], sizeof(Vertex) * vertices_.size());
-    ibo_ = std::make_shared<IndexBuffer>(&indices_[0], indices_.size());
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
+    glGenBuffers(1, &ibo_);
 
-    VertexBufferLayout layout;
-    layout.push_float(3);
-    layout.push_float(3);
-    layout.push_float(2);
-    // layout.push_float(3);
-    // layout.push_float(3);
-    vao_->addBuffer(*vbo_, layout);
-    //vao_->Unbind();
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices_.size(), vertices_.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices_.size(), indices_.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitTangent));
+    glBindVertexArray(0);
 }
 
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include "shader.hpp"
 
@@ -13,5 +14,5 @@ enum ShaderProgramType {
 struct ShaderProgram {
     std::string name;
     ShaderProgramType type;
-    Shader* shader;
+    std::shared_ptr<Shader> shader;
 };

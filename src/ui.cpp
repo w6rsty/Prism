@@ -33,47 +33,15 @@ void UI::imguiInit() {
 
 void UI::imguiLayout() {
     imguiMainTabBar();
-    if (_rd->_show_editor) imguiGLSLEditor();
     if ( _rd->_show_demo) ImGui::ShowDemoWindow();
 }
 
-void UI::initEditor() {
-    _rd->_is_editing = false;
-    _rd->_current_shader_src = ShaderType::None;
-    memset(_rd->_editor_buffer, 0, sizeof(char) *  EDITOR_BUFFER_SIZE);
-    _rd->_editor_buffer[0] = '\0';
-}
 
-void UI::imguiGLSLEditor() {
+void UI::imguiDebugPanel() {
     float tab_height = ImGui::GetTextLineHeightWithSpacing();
     ImGui::SetNextWindowPos(ImVec2((float)_rd->_width / 2.0, tab_height));
     ImGui::SetNextWindowSize(ImVec2((float)_rd->_width / 2.0, (float)_rd->_height / 2.0));
-    ImGui::Begin("GLSL Editor", NULL, ImGuiWindowFlags_NoResize);
-
-    static int item_current = 0;
-    ImGui::Combo("File", &item_current, _rd->_shader_sources.data(), _rd->_shader_sources.size()); UINEXT
-    if (item_current != 0) {
-        _rd->_is_editing = true;
-        unsigned int size = sizeof(char) * EDITOR_BUFFER_SIZE;
-        loadShaderSource(_rd->_shader_sources[item_current], _rd->_editor_buffer, size);
-        if (ImGui::Button("Save")) {
-            printf("%s\n", _rd->_editor_buffer);
-            writeShaderSource(_rd->_shader_sources[item_current], _rd->_editor_buffer);
-        }
-
-        ImGui::InputTextMultiline(
-            "##source",
-            _rd->_editor_buffer,
-            sizeof(char) * EDITOR_BUFFER_SIZE,
-            ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 30)
-        );
-    }
-    
-    if (ImGui::IsItemActive()) {
-       _rd-> _is_editing = true;
-    } else {
-        _rd->_is_editing = false;
-    }
+    ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize);
 
     ImGui::End();
 }
@@ -105,9 +73,6 @@ void UI::imguiMainTabBar() {
         if(ImGui::BeginMenu("View")) {
             if (ImGui::MenuItem("Demo")) {
                 _rd->toggle(&_rd->_show_demo);
-            }
-            if (ImGui::MenuItem("GLSL Editor", _rd->_show_editor ? "*" : "")) {
-                _rd->toggle(&_rd->_show_editor);
             }
             if (ImGui::MenuItem("Frame mode", _rd->_frame_mode ? "*" : "")) {
                 _rd->toggleFrameMode();

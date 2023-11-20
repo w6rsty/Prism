@@ -16,8 +16,8 @@ struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
-    // glm::vec3 tangent;
-    // glm::vec3 bitTangent;
+    glm::vec3 tangent;
+    glm::vec3 bitTangent;
 };
 
 struct TextureInfo {
@@ -31,10 +31,10 @@ public:
     std::vector<Vertex> vertices_;
     std::vector<unsigned int> indices_;
     std::vector<TextureInfo> textures_;
-    std::shared_ptr<VertexArray> vao_;
+    unsigned int vao_;
 private:
-    std::shared_ptr<VertexBuffer> vbo_;
-    std::shared_ptr<IndexBuffer> ibo_;
+    unsigned int vbo_;
+    unsigned int ibo_;
 public:
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureInfo> textures);
     void Draw(Shader& shader);

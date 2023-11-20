@@ -13,8 +13,5 @@ public:
     void imguiInit();
     void imguiLayout();
     void imguiMainTabBar();
-    void imguiOperationPanel();    
-    void imguiGLSLEditor();
-    void initEditor();
-    void imguiColorSelector(float* color);
+    void imguiDebugPanel();
 };

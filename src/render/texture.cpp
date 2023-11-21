@@ -1,5 +1,5 @@
-#include "texture.hpp"
-#include "error.hpp"
+#include "render/texture.hpp"
+#include "render/error.hpp"
 
 Texture::Texture(const std::string& filePath, bool flip) 
     : file_path(filePath), data(nullptr), width(0), height(0), BPP(0), flip_(flip)
@@ -31,15 +31,7 @@ Texture::Texture(int width, int height, const unsigned char* data) {
     GLCall(glBindTexture(GL_TEXTURE_2D, texture_id));
 
     if (data) {
-        GLenum format;
-        if (BPP == 1) {
-            format = GL_RED;
-        } else if (BPP == 3) {
-            format = GL_RGB;
-        } else if (BPP == 4) {
-            format = GL_RGBA;
-        }
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, data));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
         GLCall(glGenerateMipmap(GL_TEXTURE_2D));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));

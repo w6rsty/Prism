@@ -1,6 +1,6 @@
-#include "shader.hpp"
+#include "render/shader.hpp"
 
-#include "error.hpp"
+#include "render/error.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <fstream>

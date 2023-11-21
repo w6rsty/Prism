@@ -2,15 +2,18 @@
 #include "GLFW/glfw3.h"
 #include <memory>
 #include <string>
-#include "error.hpp"
-#include "model.hpp"
-#include "shader.hpp"
-#include "texture.hpp"
-#include "index_buffer.hpp"
-#include "vertex_array.hpp"
-#include "vertex_buffer.hpp"
-#include "shader_program.hpp"
-#include <thread>
+#include "glm/fwd.hpp"
+#include "render/error.hpp"
+#include "render/model.hpp"
+#include "render/shader.hpp"
+#include "render/texture.hpp"
+#include "render/index_buffer.hpp"
+#include "render/vertex_array.hpp"
+#include "render/vertex_buffer.hpp"
+#include "render/shader_program.hpp"
+
+#define planeVertexPath "D:/home/Prism/resources/shader/plane_vertex.glsl"
+#define planeFragPath "D:/home/Prism/resources/shader/plane_frag.glsl"
 
 #define assertm(msg, exp) assert(exp); printf(msg);
 
@@ -19,7 +22,7 @@ Renderer::Renderer(int w, int h, const char* name)
 {
     _aspect = (float)_width / (float)_height;
     _frame_mode = false;
-    _axis_mode = false;
+    _axis_mode = true;
     _should_cull = false;
     _show_demo = false;
     show_debug_ = false;
@@ -97,15 +100,23 @@ bool Renderer::init() {
 
     initShaders();
     initModels();
-
     axisShader();
+    shaders_["ground"] = ShaderProgram {
+        "ground",
+        ShaderProgramType::Plane,
+        std::make_shared<Shader>(planeVertexPath, planeFragPath)
+    };
+
+    _texs["ground_diff"] = new Texture("D:/home/Prism/resources/img/gray_rocks_diff.jpg");
+    _texs["ground_nor"] = new Texture("D:/home/Prism/resources/img/gray_rocks_nor.jpg");
+    ground_ = std::make_shared<pmodel::Plane>();
 
     _lightColor[0] = 1.0f;
     _lightColor[1] = 1.0f;
     _lightColor[2] = 1.0f;
-    _lightPos[0] = 3.0f;
+    _lightPos[0] = 0.0f;
     _lightPos[1] = 3.0f;
-    _lightPos[2] = 3.0f;   
+    _lightPos[2] = 0.0f;   
 
     _ui->imguiInit();
 
@@ -141,21 +152,36 @@ void Renderer::run() {
 
         _vMat = glm::perspective(glm::radians(_camera->Zoom), _aspect, 0.1f, 1000.0f);
         auto view = _camera->GetViewMatrix();
+        auto& cpos = _camera->Position;
 
         {
             auto& shader = *shaders_["mesh"].shader;
             shader.Bind();
-            auto& cpos = _camera->Position;
-            shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
+
             shader.setUniformMat4f("proj_matrix", _vMat);
             shader.setUniformMat4f("view_matrix", view);
             for (const auto& model : models_) {
                 if (model.second.ptr) {
                     glm::mat4 mMat = globalTransform_ * model.second.mMat;
                     shader.setUniformMat4f("model_matrix", mMat);
+                    shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
+                    shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
+                    shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
                     model.second.ptr->Draw(shader);
                 }
             }
+        }
+        {
+            auto& shader = *shaders_["ground"].shader;
+            shader.Bind();
+            shader.setUniformMat4f("proj_matrix", _vMat);
+            shader.setUniformMat4f("view_matrix", view);
+            glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(20, 0, 20));
+            shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
+            shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
+            shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
+            shader.setUniformMat4f("model_matrix", mMat);
+            ground_->Draw(shader, _texs["ground_diff"], _texs["ground_nor"]);
         }
 
 

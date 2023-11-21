@@ -5,9 +5,7 @@
 
 enum ShaderProgramType {
     Axis,
-    Pure,
-    Tex_Normal,
-    Color,
+    Plane,
     Mesh
 };
 

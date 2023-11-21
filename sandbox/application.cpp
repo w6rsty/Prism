@@ -1,16 +1,16 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "model.hpp"
+#include "render/model.hpp"
+#include "render/camera.hpp"
 #include "renderer.hpp"
-#include "camera.hpp"
 #include "pecs.hpp"
-#include "shader.hpp"
-#include "geo/geo.hpp"
+#include "render/shader.hpp"
 
 #define meshVertexPath "D:/home/Prism/resources/shader/mesh_vertex.glsl"
 #define meshFragPath "D:/home/Prism/resources/shader/mesh_frag.glsl"
 #define backpackModelPath "D:/home/Prism/resources/model/backpack/backpack.obj"
 #define nanosuitModelPath "D:/home/Prism/resources/model/nanosuit/nanosuit.obj"
+#define roomModelPath "D:/home/Prism/resources/model/room/room.obj"
 
 int main() {
     pecs::World world;
@@ -40,7 +40,6 @@ int main() {
         true,
         glm::scale(glm::mat4(1.0f), glm::vec3(0.6f))
     });
-
     rd.setGlobalTransform(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)));
 
     if (!rd.init()) {

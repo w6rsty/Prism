@@ -1,26 +1,5 @@
 #pragma once
 
-#include "render/texture.hpp"
-#include "shader.hpp"
-
-class Plane {
-private:
-    Texture* tex;
-public:
-    Plane() {
-        unsigned char* buffer = new unsigned char[512 * 512 * 3]; 
-        createCheckboardTexture(buffer, 512, 512, 16);
-        tex = new Texture(512, 512, buffer);
-        delete[]  buffer; 
-    }
-    ~Plane() {
-        delete tex;
-    }
-    void Draw() {
-
-    }
-};
-
 // class Geo {
 // public:
 //     virtual const void* getVertices() = 0;

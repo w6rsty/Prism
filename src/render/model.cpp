@@ -1,7 +1,7 @@
-#include "model.hpp"
+#include "render/model.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
-#include "texture.hpp"
+#include "render/texture.hpp"
 #include <iostream>
 #include <memory>
 

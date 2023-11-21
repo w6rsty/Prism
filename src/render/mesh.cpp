@@ -1,7 +1,7 @@
-#include "mesh.hpp"
-#include "error.hpp"
-#include "index_buffer.hpp"
-#include "vertex_array.hpp"
+#include "render/mesh.hpp"
+#include "render/error.hpp"
+#include "render/index_buffer.hpp"
+#include "render/vertex_array.hpp"
 #include <memory>
 #include <string>
 

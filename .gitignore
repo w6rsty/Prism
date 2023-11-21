@@ -1,2 +1,4 @@
 build/
 .cache/
+resources/img
+resources/model/room

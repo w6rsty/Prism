@@ -1,5 +1,5 @@
-#include "index_buffer.hpp"
-#include "error.hpp"
+#include "render/index_buffer.hpp"
+#include "render/error.hpp"
 
 IndexBuffer::IndexBuffer(const void* data, unsigned int count) {
     GLCall(glGenBuffers(1, &buffer_id));

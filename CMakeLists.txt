@@ -10,9 +10,6 @@ set(EXPORT_COMPILE_COMMANDS ON)
 
 target_compile_features(engine PRIVATE cxx_std_17)
 target_include_directories(engine PUBLIC include)
-target_include_directories(engine PUBLIC include/render)
-target_include_directories(engine PRIVATE include/scene)
-target_include_directories(engine PRIVATE include/anim)
 
 add_subdirectory(3rdlibs)
 

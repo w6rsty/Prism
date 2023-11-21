@@ -7,16 +7,16 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "camera.hpp"
+#include "render/camera.hpp"
 #include "renderer.hpp"
-#include "vertex_array.hpp"
-#include "index_buffer.hpp"
-#include "vertex_buffer.hpp"
-#include "texture.hpp"
-#include "shader.hpp"
+#include "render/vertex_array.hpp"
+#include "render/index_buffer.hpp"
+#include "render/vertex_buffer.hpp"
+#include "render/texture.hpp"
+#include "render/shader.hpp"
 #include "ui.hpp"
-#include "shader_program.hpp"
-#include "model.hpp"
+#include "render/shader_program.hpp"
+#include "render/model.hpp"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -80,6 +80,8 @@ private:
         glm::mat4 mMat;
     };
     std::unordered_map<std::string, ModelRenderInfo>  models_;
+
+    std::shared_ptr<pmodel::Geo> ground_;
 
     float _lightColor[3];
     float _lightPos[3];

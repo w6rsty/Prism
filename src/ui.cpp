@@ -6,6 +6,8 @@
 #include "renderer.hpp"
 #include "render/shader.hpp"
 
+namespace prism {
+
 UI::UI(Renderer* rd) {
     _rd = rd;
 }
@@ -97,3 +99,5 @@ void UI::imguiMainTabBar() {
         ImGui::EndMainMenuBar();
     }
 }
+
+} // namespace prism

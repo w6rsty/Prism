@@ -1,52 +1,28 @@
+#include "pecs.hpp"
+#include "startup.hpp"
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "renderer.hpp"
 #include "render/model.hpp"
 #include "render/camera.hpp"
-#include "renderer.hpp"
-#include "pecs.hpp"
 #include "render/shader.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
-#define meshVertexPath "D:/home/Prism/resources/shader/mesh_vertex.glsl"
-#define meshFragPath "D:/home/Prism/resources/shader/mesh_frag.glsl"
-#define backpackModelPath "D:/home/Prism/resources/model/backpack/backpack.obj"
-#define nanosuitModelPath "D:/home/Prism/resources/model/nanosuit/nanosuit.obj"
-#define roomModelPath "D:/home/Prism/resources/model/room/room.obj"
+using namespace pecs;
 
 int main() {
     pecs::World world;
 
-    Renderer rd(1800, 1200, "Prism Engine");
-    // set camera
-    rd.setCamera(new Camera({0, 1, 1}));
-    // set mesh shader
-    rd.createShader({
-        "mesh",
-        meshVertexPath, 
-        meshFragPath
-    });
-    glm::mat4 mat = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
-    mat = glm::translate(mat, glm::vec3(0.0, 6.5, 2));
-    // set model
-    rd.createModel({
-        "backpack",
-        backpackModelPath,
-        false,
-        mat
-    });
+    world.AddStartupSystem(startup)
+         .AddSystem(renderSystem)
+         .AddSystem(updateTickerSystem)
+         .AddSystem(echoTickerSystem);
 
-    rd.createModel({
-        "nanosuit",
-        nanosuitModelPath,
-        true,
-        glm::scale(glm::mat4(1.0f), glm::vec3(0.6f))
-    });
-    rd.setGlobalTransform(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)));
+    world.Startup();
 
-    if (!rd.init()) {
-        return EXIT_FAILURE;
+    while (true) {
+        world.Update();
     }
-    
-    rd.run();
 
+    world.Shutdown();
     return EXIT_SUCCESS;
 }

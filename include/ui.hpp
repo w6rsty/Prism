@@ -2,6 +2,8 @@
 
 #include "renderer.hpp"
 
+namespace prism {
+
 class Renderer;
 
 class UI {
@@ -15,3 +17,5 @@ public:
     void imguiMainTabBar();
     void imguiDebugPanel();
 };
+
+} // namespace prism

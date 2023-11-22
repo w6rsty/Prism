@@ -7,6 +7,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "pecs.hpp"
 #include "render/camera.hpp"
 #include "renderer.hpp"
 #include "render/vertex_array.hpp"
@@ -30,6 +31,8 @@
 #define texPath "D:/home/Prism/resources/img/image.png"
 #define fontPath1 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
 #define fontPath2 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
+
+namespace prism {
 
 struct CreateModelInfo {
     const char* name;
@@ -108,8 +111,7 @@ public:
     ~Renderer();
 
     bool init();
-
-    void run();
+    void render();
 
     inline int width() const { return _width; }
     inline int height() const { return _height; }
@@ -131,3 +133,5 @@ private:
     void mouse_callback(double xposIn, double yposIn);
     void scroll_callback( double xoffset, double yoffset);
 };
+
+} // namespace prism

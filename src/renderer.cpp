@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include "glm/fwd.hpp"
+#include "pecs.hpp"
 #include "render/error.hpp"
 #include "render/model.hpp"
 #include "render/shader.hpp"
@@ -15,7 +16,7 @@
 #define planeVertexPath "D:/home/Prism/resources/shader/plane_vertex.glsl"
 #define planeFragPath "D:/home/Prism/resources/shader/plane_frag.glsl"
 
-#define assertm(msg, exp) assert(exp); printf(msg);
+namespace prism {
 
 Renderer::Renderer(int w, int h, const char* name)
     : _width(w), _height(h), _name(name)
@@ -126,75 +127,72 @@ bool Renderer::init() {
     return true;
 }
 
-void Renderer::run() {
-    while (!glfwWindowShouldClose(_window)) {
-        // Delta time calcualtion
-        float currentFrame = static_cast<float>(glfwGetTime());
-        _delta_time = currentFrame - _last_time;
-        _last_time= currentFrame;
+void Renderer::render() {
+    // Delta time calcualtion
+    float currentFrame = static_cast<float>(glfwGetTime());
+    _delta_time = currentFrame - _last_time;
+    _last_time= currentFrame;
 
-        // Buffer Clear
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
-        GLCall(glClear(GL_DEPTH_BUFFER_BIT));
-        if (_should_cull) {
-            GLCall(glEnable(GL_CULL_FACE));
-        } else {
-            GLCall(glDisable(GL_CULL_FACE));
-        }
+    // Buffer Clear
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+    if (_should_cull) {
+        GLCall(glEnable(GL_CULL_FACE));
+    } else {
+        GLCall(glDisable(GL_CULL_FACE));
+    }
 
-        processInput(_window);
+    processInput(_window);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-        _ui->imguiLayout();
+    _ui->imguiLayout();
 
-        _vMat = glm::perspective(glm::radians(_camera->Zoom), _aspect, 0.1f, 1000.0f);
-        auto view = _camera->GetViewMatrix();
-        auto& cpos = _camera->Position;
+    _vMat = glm::perspective(glm::radians(_camera->Zoom), _aspect, 0.1f, 1000.0f);
+    auto view = _camera->GetViewMatrix();
+    auto& cpos = _camera->Position;
+    {
+        auto& shader = *shaders_["mesh"].shader;
+        shader.Bind();
 
-        {
-            auto& shader = *shaders_["mesh"].shader;
-            shader.Bind();
-
-            shader.setUniformMat4f("proj_matrix", _vMat);
-            shader.setUniformMat4f("view_matrix", view);
-            for (const auto& model : models_) {
-                if (model.second.ptr) {
-                    glm::mat4 mMat = globalTransform_ * model.second.mMat;
-                    shader.setUniformMat4f("model_matrix", mMat);
-                    shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
-                    shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
-                    shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
-                    model.second.ptr->Draw(shader);
-                }
+        shader.setUniformMat4f("proj_matrix", _vMat);
+        shader.setUniformMat4f("view_matrix", view);
+        for (const auto& model : models_) {
+            if (model.second.ptr) {
+                glm::mat4 mMat = globalTransform_ * model.second.mMat;
+                shader.setUniformMat4f("model_matrix", mMat);
+                shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
+                shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
+                shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
+                model.second.ptr->Draw(shader);
             }
         }
-        {
-            auto& shader = *shaders_["ground"].shader;
-            shader.Bind();
-            shader.setUniformMat4f("proj_matrix", _vMat);
-            shader.setUniformMat4f("view_matrix", view);
-            glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(20, 0, 20));
-            shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
-            shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
-            shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
-            shader.setUniformMat4f("model_matrix", mMat);
-            ground_->Draw(shader, _texs["ground_diff"], _texs["ground_nor"]);
-        }
-
-
-        if (_axis_mode) {
-            drawAxis(view);
-        }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        glfwSwapBuffers(_window);
-        glfwPollEvents();   
     }
+    {
+        auto& shader = *shaders_["ground"].shader;
+        shader.Bind();
+        shader.setUniformMat4f("proj_matrix", _vMat);
+        shader.setUniformMat4f("view_matrix", view);
+        glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(20, 0, 20));
+        shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
+        shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
+        shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
+        shader.setUniformMat4f("model_matrix", mMat);
+        ground_->Draw(shader, _texs["ground_diff"], _texs["ground_nor"]);
+    }
+
+
+    if (_axis_mode) {
+        drawAxis(view);
+    }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(_window);
+    glfwPollEvents();   
 }
 
 void Renderer::processInput(GLFWwindow *window)
@@ -317,3 +315,6 @@ void Renderer::initShaders() {
     }
     createShaderInfos_.clear();
 }
+
+
+} // namespace prism

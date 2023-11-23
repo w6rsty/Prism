@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace pmodel {
+namespace prism {
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureInfo> textures)
     : vertices_(vertices), indices_(indices), textures_(textures)

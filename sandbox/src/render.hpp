@@ -1,10 +1,8 @@
 #pragma once
 
-#include "renderer.hpp"
 #include "pecs.hpp"
-
-#include "render_object.hpp"
-#include "ticker.hpp"
+#include "renderer.hpp"
+#include "config.hpp"
 #include "ticker.hpp"
 
 #define meshVertexPath "D:/home/Prism/resources/shader/mesh_vertex.glsl"
@@ -13,12 +11,18 @@
 #define nanosuitModelPath "D:/home/Prism/resources/model/nanosuit/nanosuit.obj"
 #define roomModelPath "D:/home/Prism/resources/model/room/room.obj"
 
-using namespace pecs; 
+using namespace pecs;
 
-inline void startup(Commands& command) {
-    prism::Renderer* rd = new prism::Renderer(1800, 1200, "Prsim Engine");
-        // set camera
-    rd->setCamera(new Camera({0, 1, 1}));
+struct RenderObject {
+    prism::Renderer* rd;  
+};
+
+inline void startupRenderSystem(Commands& command) {
+    prism::Renderer* rd = new prism::Renderer(WIDTH, HEIGHT, GAME_NAME);
+    GAME_WINDOW = glfwCreateWindow(WIDTH, HEIGHT, GAME_NAME, NULL, NULL);
+    rd->setWindow(GAME_WINDOW);
+    // set camera
+    rd->setCamera(new Camera({0, 0, 1}));
     // set mesh shader
     rd->createShader({
         "mesh",
@@ -47,6 +51,11 @@ inline void startup(Commands& command) {
         assert(false);
     }
 
-    command.SetResource(Ticker { .tick = 0 })
-           .SetResource(RenderObject{ .rd = rd });
+    command.SetResource(RenderObject{ .rd = rd });
+}
+
+inline void renderSystem(Commands& command, Queryer queryer, Resources resources, Events& events) {
+    auto& renderer = resources.Get<RenderObject>();
+    renderer.rd->render(); 
+    renderer.rd->ticker = resources.Get<Ticker>().tick;
 }

@@ -2,8 +2,7 @@
 #include "GLFW/glfw3.h"
 #include <memory>
 #include <string>
-#include "glm/fwd.hpp"
-#include "pecs.hpp"
+#include "geo/geometry.hpp"
 #include "render/error.hpp"
 #include "render/model.hpp"
 #include "render/shader.hpp"
@@ -27,14 +26,32 @@ Renderer::Renderer(int w, int h, const char* name)
     _should_cull = false;
     _show_demo = false;
     show_debug_ = false;
+    enable_vsync_ = false;
 
     _first_mouse = false;
     _delta_time = 0.0f;
     _last_time = 0.0f;
-    _last_x = _width / 2.0f;
-    _last_y = _height / 2.0f;
+    last_x_ = _width / 2.0f;
+    last_y_ = _height / 2.0f;
+
+    _lightColor[0] = 1.0f;
+    _lightColor[1] = 1.0f;
+    _lightColor[2] = 1.0f;
+    _lightPos[0] = 0.0f;
+    _lightPos[1] = 3.0f;
+    _lightPos[2] = 0.0f;   
 
     _camera = nullptr;
+    window_ = nullptr;
+
+    if (!glfwInit()) {
+        printf("\x1b[31;1m Failed to initialize GLFW\n\x1b[0m\n");
+        assert(false);
+    }
+
+    glfwWindowHint(GLFW_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 }
 
 Renderer::~Renderer() {
@@ -47,79 +64,57 @@ Renderer::~Renderer() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    if (_window) {
-        glfwDestroyWindow(_window);
+    if (window_) {
+        glfwDestroyWindow(window_);
     }
     if (_camera) {
         delete  _camera;
     }
-    glfwTerminate();
 }
 
 bool Renderer::init() {
-    if (_camera == nullptr) {
+    if (!_camera) {
         printf("\x1b[31;1m[Renderer initialization Failed]No camera!\x1b[0m\n");
         return false;
     }
 
-    if (!glfwInit()) {
-        printf("\x1b[31;1m Failed to initialize GLFW\n\x1b[0m\n");
+    if (!window_) {
+        printf("\x1b[31;1m[Renderer initialization Failed]No window!\x1b[0m\n");
         return false;
     }
 
-    glfwWindowHint(GLFW_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    _window = glfwCreateWindow(_width, _height, _name, NULL, NULL);
-    if (_window == nullptr) {
-        printf("\x1b[31;1mFaild to create GLFW window\n\x1b[0m\n");
-        return false;
-    } else {
-        printf("\x1b[32;1mSuccessfully create window '%s' (%d,%d)\n\x1b[0m", _name, _width, _height);
-    }
-    glfwMakeContextCurrent(_window);
-    glfwSwapInterval(1);
-
+    glfwMakeContextCurrent(window_);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         printf("\x1b[31;1mFailed to initialize OpenGL context\n\x1b[0m\n");
         return false;
     }
+    std::cout << "[GLAD] " << glGetString(GL_VERSION) << std::endl; 
 
-    glfwSetWindowUserPointer(_window, this);
+    glfwSetWindowUserPointer(window_, this);
     auto mouse_func = [](GLFWwindow* window, double xpos, double ypos) {
         static_cast<Renderer*>(glfwGetWindowUserPointer(window))->mouse_callback(xpos, ypos);
     };
     auto scroll_func = [](GLFWwindow* window, double xoffset, double yoffset) {
         static_cast<Renderer*>(glfwGetWindowUserPointer(window))->scroll_callback(xoffset, yoffset);
     };
-    glfwSetCursorPosCallback(_window, mouse_func);
-    glfwSetScrollCallback(_window, scroll_func);
+    auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        static_cast<Renderer*>(glfwGetWindowUserPointer(window))->key_callback(key, scancode, action, mods);
+    };
+    glfwSetCursorPosCallback(window_, mouse_func);
+    glfwSetScrollCallback(window_, scroll_func);
+    glfwSetKeyCallback(window_, key_func);
 
-    _ui = new UI(this); 
+    ui_ = std::make_unique<UI>(this); 
 
     initShaders();
     initModels();
     axisShader();
-    shaders_["ground"] = ShaderProgram {
-        "ground",
-        ShaderProgramType::Plane,
-        std::make_shared<Shader>(planeVertexPath, planeFragPath)
-    };
 
-    _texs["ground_diff"] = new Texture("D:/home/Prism/resources/img/gray_rocks_diff.jpg");
-    _texs["ground_nor"] = new Texture("D:/home/Prism/resources/img/gray_rocks_nor.jpg");
-    ground_ = std::make_shared<pmodel::Plane>();
+    ptr_ = new Sphere();
 
-    _lightColor[0] = 1.0f;
-    _lightColor[1] = 1.0f;
-    _lightColor[2] = 1.0f;
-    _lightPos[0] = 0.0f;
-    _lightPos[1] = 3.0f;
-    _lightPos[2] = 0.0f;   
-
-    _ui->imguiInit();
+    ui_->imguiInit();
 
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glDepthFunc(GL_LESS));
@@ -142,13 +137,11 @@ void Renderer::render() {
         GLCall(glDisable(GL_CULL_FACE));
     }
 
-    processInput(_window);
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    _ui->imguiLayout();
+    ui_->imguiLayout();
 
     _vMat = glm::perspective(glm::radians(_camera->Zoom), _aspect, 0.1f, 1000.0f);
     auto view = _camera->GetViewMatrix();
@@ -166,24 +159,12 @@ void Renderer::render() {
                 shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
                 shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
                 shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
-                model.second.ptr->Draw(shader);
+                model.second.ptr->onRender(shader);
             }
         }
+        ptr_->onRender(shader);
     }
-    {
-        auto& shader = *shaders_["ground"].shader;
-        shader.Bind();
-        shader.setUniformMat4f("proj_matrix", _vMat);
-        shader.setUniformMat4f("view_matrix", view);
-        glm::mat4 mMat = glm::scale(glm::mat4(1.0f), glm::vec3(20, 0, 20));
-        shader.setUniform3f("viewPos", cpos.x, cpos.y, cpos.z);
-        shader.setUniform3f("light.pos", _lightPos[0], _lightPos[1], _lightPos[2]);
-        shader.setUniform3f("light.color", _lightColor[0], _lightColor[1], _lightColor[2]);
-        shader.setUniformMat4f("model_matrix", mMat);
-        ground_->Draw(shader, _texs["ground_diff"], _texs["ground_nor"]);
-    }
-
-
+    
     if (_axis_mode) {
         drawAxis(view);
     }
@@ -191,26 +172,32 @@ void Renderer::render() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(window_);
     glfwPollEvents();   
 }
 
-void Renderer::processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+void Renderer::key_callback(int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        keys_[scancode] = true; 
+    } else if (action == GLFW_RELEASE) {
+        keys_[scancode] = false;
+    }
+    
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_ESCAPE)])
+        glfwSetWindowShouldClose(window_, true);
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_W)])
         _camera->ProcessKeyboard(FORWARD, _delta_time);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_S)])
         _camera->ProcessKeyboard(BACKWARD, _delta_time);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_A)])
         _camera->ProcessKeyboard(LEFT, _delta_time);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_D)])
         _camera->ProcessKeyboard(RIGHT, _delta_time);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_LEFT_SHIFT)])
         _camera->ProcessKeyboard(UP, _delta_time);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (keys_[glfwGetKeyScancode(GLFW_KEY_LEFT_CONTROL)])
         _camera->ProcessKeyboard(DOWN, _delta_time);
+
 }
 
 
@@ -220,6 +207,14 @@ void Renderer::toggleFrameMode() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
+
+void Renderer::toggleVSync() {
+    if (enable_vsync_) {
+        glfwSwapInterval(1);
+    } else {
+        glfwSwapInterval(0);
     }
 }
 
@@ -268,16 +263,16 @@ void Renderer::mouse_callback(double xposIn, double yposIn)
 
     if (_first_mouse)
     {
-        _last_x = xpos;
-        _last_y = ypos;
+        last_x_ = xpos;
+        last_y_ = ypos;
         _first_mouse = false;
     }
-    float xoffset = xpos - _last_x;
-    float yoffset = _last_y - ypos;
+    float xoffset = xpos - last_x_;
+    float yoffset = last_y_ - ypos;
 
-    _last_x = xpos;
-    _last_y = ypos;
-    if (glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    last_x_ = xpos;
+    last_y_ = ypos;
+    if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
         _camera->ProcessMouseMovement(xoffset, yoffset);
     }
 }
@@ -298,7 +293,7 @@ void Renderer::createShader(CreateShaderInfo info) {
 void Renderer::initModels() {
     for (const auto& info : createModelInfos_) {
         models_[info.name] = ModelRenderInfo {
-            std::make_shared<pmodel::Model>(info.modelPath, info.flip),
+            std::make_shared<Model>(info.modelPath, info.flip),
             info.mMat
         };
     }

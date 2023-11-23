@@ -20,7 +20,7 @@ uniform vec3 viewPos;
 void main(void) {
     vec3 tex_diffuse = texture(tex_diff, TexCoord).rgb;
     vec3 ambient = 0.2 * tex_diffuse;
-    
+    vec3 view_pos = viewPos;    
     vec3 norm = normalize(texture(tex_nor, TexCoord).rgb);
     vec3 lightDir = normalize(light.pos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);

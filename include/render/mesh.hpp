@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace pmodel {
+namespace prism {
 
 struct Vertex {
     glm::vec3 position;

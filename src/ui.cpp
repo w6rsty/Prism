@@ -1,8 +1,9 @@
 #include "ui.hpp"
 
+#include "GLFW/glfw3.h"
 #include "imgui.h"
 
-#include "glsl_loader.hpp"
+#include "tools/glsl_loader.hpp"
 #include "renderer.hpp"
 #include "render/shader.hpp"
 
@@ -28,7 +29,7 @@ void UI::imguiInit() {
         case 2: ImGui::StyleColorsClassic(); break;
     }
 
-    ImGui_ImplGlfw_InitForOpenGL( _rd->_window, true);
+    ImGui_ImplGlfw_InitForOpenGL( _rd->window_, true);
     const char* glsl_version = "#version 460";
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
@@ -45,6 +46,13 @@ void UI::imguiDebugPanel() {
     ImGui::SetNextWindowPos(ImVec2(0, tab_height));
     ImGui::SetNextWindowSize(ImVec2((float)_rd->_width / 3.0, (float)_rd->_height));
     ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize);
+
+    ImGui::Text("Delta time: %.1fms", _rd->_delta_time * 1000.0f);
+    ImGui::Text("FPS: %d", int(1.0f / _rd->_delta_time));
+    if (ImGui::Checkbox("VSync", &_rd->enable_vsync_)) {
+        _rd->toggleVSync();
+    }
+
     auto& cpos = _rd->_camera->Position;
     ImGui::Text("cam pos: (%.3f %.3f %.3f)", cpos.x, cpos.y, cpos.z);
     ImGui::SliderFloat3("light.pos", _rd->_lightPos, -10.0f, 10.0f);
@@ -57,7 +65,7 @@ void UI::imguiMainTabBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Menu")) {
             if (ImGui::MenuItem("quit")) {
-                glfwSetWindowShouldClose(_rd->_window, true);
+                glfwSetWindowShouldClose(_rd->window_, true);
             }
             if (ImGui::BeginMenu("Preference")) {
                 if (ImGui::BeginMenu("Theme")) {

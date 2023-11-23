@@ -5,14 +5,14 @@
 #include <iostream>
 #include <memory>
 
-namespace pmodel {
+namespace prism {
 
 Model::Model(const std::string& path, bool flip)
     : flip_(flip)
 {
     loadModel(path);
 }
-void Model::Draw(Shader& shader) {
+void Model::onRender(Shader& shader) {
     for (const auto& mesh : meshes_) {
         mesh->Draw(shader);
     }

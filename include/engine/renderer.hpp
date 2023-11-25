@@ -20,6 +20,7 @@
 #include "render/index_buffer.hpp"
 #include "render/vertex_buffer.hpp"
 #include "render/shader_program.hpp"
+#include "render/drawable_manager.hpp"
 
 #define UINEXT ImGui::SameLine();
 #define UIDIVIDER ImGui::Separator();
@@ -32,19 +33,6 @@
 #define fontPath2 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
 
 namespace prism {
-
-struct CreateModelInfo {
-    const char* name;
-    const char* modelPath;
-    bool flip;
-    glm::mat4 mMat = glm::mat4(1.0f);
-};
-
-struct CreateShaderInfo {
-    const char* name;
-    const char* vsPath;
-    const char* fsPath;
-};
 
 class UI;
 
@@ -60,7 +48,7 @@ private:
     Camera*             _camera;
     // cursor position
     bool                _first_mouse;
-    glm::mat4           _vMat;
+    glm::mat4           projMat_;
 
     bool                _frame_mode;
     // frame render time
@@ -70,23 +58,6 @@ private:
     std::unordered_map<std::string, VertexArray*>   _vaos;
     std::unordered_map<std::string, VertexBuffer*>  _vbos;
     std::unordered_map<std::string, IndexBuffer*>   _ibos;
-    std::unordered_map<std::string, Texture*>       _texs;
-
-    std::vector<CreateModelInfo>                    createModelInfos_; 
-    std::vector<CreateShaderInfo>                   createShaderInfos_; 
-
-    glm::mat4          globalTransform_ = glm::mat4(1.0f);
-
-    Drawable* ptr_;
-
-    std::unordered_map<std::string, ShaderProgram>  shaders_;
-
-    struct ModelRenderInfo {
-        std::shared_ptr<Model> ptr;
-        glm::mat4 mMat;
-    };
-
-    std::unordered_map<std::string, ModelRenderInfo>  models_;
 
     float               _lightColor[3];
     float               _lightPos[3];
@@ -112,8 +83,6 @@ private:
     float last_x_;
     float last_y_;
 public:
-    int ticker = {};
-public:
     Renderer(int w, int h, const char* name);
     ~Renderer();
 
@@ -126,14 +95,7 @@ public:
     inline GLFWwindow* getWindow() const { return window_; }
     inline void setCamera(Camera* camera) { _camera = camera; }
 
-    void createModel(CreateModelInfo info);
-    void createShader(CreateShaderInfo info);
-
-    inline void setGlobalTransform(glm::mat4 mat) { globalTransform_ = mat; }
 private:
-    void initModels();
-    void initShaders();
-
     void toggleFrameMode();
     void toggleVSync();
     void toggle(bool* value);

@@ -1,4 +1,5 @@
 aux_source_directory(src/ GAME_SRC)
+aux_source_directory(src/event GAME_SRC)
 
 add_executable(game ${GAME_SRC})
 

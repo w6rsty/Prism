@@ -6,6 +6,8 @@ aux_source_directory(src/ SRC)
 aux_source_directory(src/render SRC)
 aux_source_directory(src/anim SRC)
 aux_source_directory(src/geo SRC)
+aux_source_directory(src/tools SRC)
+aux_source_directory(src/engine SRC)
 
 add_library(engine STATIC ${SRC})
 set(EXPORT_COMPILE_COMMANDS ON)

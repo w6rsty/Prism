@@ -15,7 +15,7 @@ int main() {
 
     world.Startup();
     
-    while (!glfwWindowShouldClose(GAME_WINDOW)) {
+    while (true) {
         world.Update();
     }
 

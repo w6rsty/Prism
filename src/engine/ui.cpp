@@ -1,10 +1,8 @@
-#include "ui.hpp"
+#include "engine/ui.hpp"
 
 #include "GLFW/glfw3.h"
 #include "imgui.h"
-
-#include "tools/glsl_loader.hpp"
-#include "renderer.hpp"
+#include "engine/renderer.hpp"
 #include "render/shader.hpp"
 
 namespace prism {

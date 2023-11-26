@@ -1,9 +1,8 @@
 #pragma once
 
 #include "pecs.hpp"
-#include "engine/renderer.hpp"
-#include "config/config.hpp"
 #include "ticker.hpp"
+#include "engine/window.hpp"
 
 #define meshVertexPath "D:/home/Prism/resources/shader/mesh_vertex.glsl"
 #define meshFragPath "D:/home/Prism/resources/shader/mesh_frag.glsl"
@@ -13,25 +12,10 @@
 
 using namespace pecs;
 
-struct RenderObject {
-    prism::Renderer* rd;  
-};
-
 inline void startupRenderSystem(Commands& command) {
-    prism::Renderer* rd = new prism::Renderer(WIDTH, HEIGHT, GAME_NAME);
-    GAME_WINDOW = glfwCreateWindow(WIDTH, HEIGHT, GAME_NAME, NULL, NULL);
-    rd->setWindow(GAME_WINDOW);
-    // set camera
-    rd->setCamera(new Camera({0, 0, 1}));
-    // set mesh shader
-    if (!rd->init()) {
-        assert(false);
-    }
-
-    command.SetResource(RenderObject{ .rd = rd });
 }
 
-inline void renderSystem(Commands& command, Queryer queryer, Resources resources, Events& events) {
-    auto& renderer = resources.Get<RenderObject>();
-    renderer.rd->render();
+inline void updateRenderSystem(Commands& command, Queryer queryer, Resources resources, Events& events) {
+    auto& window = resources.Get<prism::Window>();
+    window.OnUpdate();
 }

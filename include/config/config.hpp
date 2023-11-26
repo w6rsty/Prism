@@ -1,16 +1,15 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+namespace prism {
 
-static GLFWwindow* GAME_WINDOW;
-static const int WIDTH = 1800;
-static const int HEIGHT = 1200;
-static const char* GAME_NAME = "Prism Engine";
+struct WindowProps {
+    const char* title;
+    int width;
+    int height;
+};
 
-static bool FIRST_MOUSE = true;
-static float LAST_X = static_cast<float>(WIDTH) / 2;
-static float LAST_Y = static_cast<float>(HEIGHT) / 2;
+static const WindowProps DefaultWindowProps { "Prism Engine", 1920, 1080 };
 
-#define PRISM_KEY_LAST GLFW_KEY_LAST
+static const char* FontPath = "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-Regular.ttf";
 
-static bool PRISM_KEYS[PRISM_KEY_LAST] = { false };
+} // namespace prism

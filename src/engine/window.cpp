@@ -1,7 +1,9 @@
 #include "engine/window.hpp"
 #include "GLFW/glfw3.h"
+#include "engine/event/application_event.hpp"
 #include "engine/event/key_event.hpp"
 #include "engine/event/mouse_event.hpp"
+#include "engine/log.hpp"
 #include <cassert>
 #include <cstdio>
 
@@ -11,15 +13,26 @@ Window::Window(const WindowProps& data) {
     windowData_.title = data.title;
     windowData_.width = data.width;
     windowData_.height = data.height;
-    windowData_.vsync = data.vsync;
-    windowData_.eventCallback = data.eventCallback;
+    windowData_.vsync = true;
 
     initGLFW();
     initGLAD();
 
 
+    glfwSetWindowCloseCallback(window_, [](GLFWwindow* window) {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+        WindowCloseEvent event;
+        data.eventCallback(event);
+    });
+
+    glfwSetWindowSizeCallback(window_, [](GLFWwindow* window, int width, int height) {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+        WindowResizeEvent event(width, height);
+        data.eventCallback(event);
+    });
+
     glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
         switch (action) {
             case GLFW_PRESS: {
@@ -41,26 +54,47 @@ Window::Window(const WindowProps& data) {
     });
 
     glfwSetCharCallback(window_, [](GLFWwindow* window, unsigned int keycode) {
-        WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         KeyTypedEvent event(keycode);
         data.eventCallback(event);
     });
 
+    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int mods) {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+        switch (action) {
+            case GLFW_PRESS: {
+                MouseButtonPressedEvent event(button);
+                data.eventCallback(event);
+                break;
+            }
+            case GLFW_RELEASE: {
+                MouseButtonReleasedEvent event(button);
+                data.eventCallback(event);
+                break;
+            }
+        }
+    });
+
     glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xPos, double yPos) {
-        WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         MouseMovedEvent event(xPos, yPos);
+        data.eventCallback(event);
     });
 
     glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
-        WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         MouseScrolledEvent event(xoffset, yoffset);
         data.eventCallback(event);
     });
 }
 
+Window* Window::Create(const WindowProps& data) {
+    return new Window(data);
+}
+
 void Window::initGLFW() {
     if (!glfwInit()) {
-        printf("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW\n\x1b[0m\n");
         assert(false);
     }
 
@@ -71,7 +105,7 @@ void Window::initGLFW() {
     window_ = glfwCreateWindow(windowData_.width, windowData_.height, windowData_.title, NULL, NULL);
 
     if (!window_) {
-        printf("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW Window\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW Window\n\x1b[0m\n");
         assert(false);
     }
 
@@ -82,10 +116,12 @@ void Window::initGLFW() {
 
 void Window::initGLAD() {
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        printf("\x1b[31;1mFailed to initialize OpenGL context\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1mFailed to initialize OpenGL context\n\x1b[0m\n");
         assert(false);
     } else {
-        printf("[GLAD] %s", glGetString(GL_VERSION));
+        std::stringstream ss;
+        ss << "\x1b[32;1m[GLAD] " << glGetString(GL_VERSION) << " \x1b[0m\n";
+        PRISM_CORE_INFO(ss.str());
     }
 }
 
@@ -98,6 +134,11 @@ void Window::OnUpdate() {
     glfwPollEvents();   
     glfwSwapBuffers(window_);
 }
+
+void Window::SetEventCallback(EventCallbackFn callback) {
+    windowData_.eventCallback = callback;
+}
+
 
 Window::~Window() {
     shutdown();

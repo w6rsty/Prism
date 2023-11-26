@@ -8,14 +8,20 @@ class Renderer;
 
 class UI {
 private:
-    Renderer* _rd;
+    float* delta_time_;
+    int windowWidth_, windowHeight_;
+    bool show_demo_ = false;
+    bool show_debug_ = false;
 public:
-    UI(Renderer* rd);
+    bool enable_vsync = true;
+    UI(int width, int height, float* time);
+    ~UI();
 
-    void imguiInit();
     void imguiLayout();
+private:
     void imguiMainTabBar();
-    void imguiDebugPanel();
+    void imguiDebugPanel(); 
+    inline float getTime() const { return *delta_time_; }
 };
 
 } // namespace prism

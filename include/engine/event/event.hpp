@@ -11,6 +11,8 @@ namespace prism {
 
 enum class EventType {
     None = 0,
+    WindowClosed, WindowResized, WindowForcus, WindowLostForcus, WindowMoved,
+    AppTick, AppUpdate, AppRender,
     KeyPressed, KeyReleased, KeyTyped,
     MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,  
 };
@@ -52,7 +54,7 @@ public:
     EventDispatcher(Event& event)
         : event_(event) {}
     
-    template <typename T, std::enable_if_t<std::is_base_of<Event, T>::value>>
+    template <typename T>
     bool Dispatch(EventFunc<T> func) {
         if (event_.GetEventType() == T::GetStaticType()) {
             event_.handled_ = func(*(T*)&event_);

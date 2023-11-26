@@ -13,7 +13,7 @@ void VertexArray::addBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
     GLCall(glBindVertexArray(buffer_id));
     vb.Bind();
 
-    unsigned int offset = 0;
+    size_t offset = 0;
     const auto& elements = layout.getElement();
     for (unsigned int i = 0; i < elements.size(); i++) {
         const auto& element = elements[i];

@@ -28,10 +28,6 @@
 #define axisVertexPath "D:/home/Prism/resources/shader/axis_vertex.glsl"
 #define axisFragPath "D:/home/Prism/resources/shader/axis_frag.glsl"
 
-#define texPath "D:/home/Prism/resources/img/image.png"
-#define fontPath1 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-Regular.ttf"
-#define fontPath2 "D:/home/Prism/resources/font/JetBrainsMonoNerdFontMono-SemiBold.ttf"
-
 namespace prism {
 
 class UI;

@@ -10,7 +10,7 @@ namespace prism {
 
 using EventCallbackFn = std::function<void(Event&)>;
 
-struct WindowProps {
+struct WindowData {
     const char* title;
     int width;
     int height;
@@ -27,15 +27,18 @@ public:
     void SetSync(bool enable);
 
     void OnUpdate();
+    void SetEventCallback(EventCallbackFn callback);
+    inline int GetWidth() const { return windowData_.width; }
+    inline int GetHeight() const { return windowData_.height; }
+
+    static Window* Create(const WindowProps& data = DefaultWindowProps);
 private:
     void initGLFW();
     void initGLAD();
     void shutdown();
 private:
     GLFWwindow* window_;
-    WindowProps windowData_;
-
-    Window& operator=(const Window&) = delete;
+    WindowData windowData_;
 };
 
 } // namespace prism

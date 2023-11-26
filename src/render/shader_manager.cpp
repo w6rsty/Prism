@@ -1,5 +1,3 @@
-#pragma once
-
 #include "render/shader_manager.hpp"
 
 namespace prism {

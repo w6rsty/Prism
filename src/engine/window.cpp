@@ -146,6 +146,7 @@ Window::~Window() {
 
 void Window::shutdown() {
     glfwDestroyWindow(window_);
+    glfwTerminate();
 }
 
 

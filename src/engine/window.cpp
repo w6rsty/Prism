@@ -10,6 +10,7 @@
 namespace prism {
 
 Window::Window(const WindowProps& data) {
+    PRISM_CORE_INFO("[Creating Window]");
     windowData_.title = data.title;
     windowData_.width = data.width;
     windowData_.height = data.height;
@@ -28,6 +29,7 @@ Window::Window(const WindowProps& data) {
     glfwSetWindowSizeCallback(window_, [](GLFWwindow* window, int width, int height) {
         WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         WindowResizeEvent event(width, height);
+        PRISM_CORE_WARN(event.ToString());
         data.eventCallback(event);
     });
 
@@ -94,7 +96,7 @@ Window* Window::Create(const WindowProps& data) {
 
 void Window::initGLFW() {
     if (!glfwInit()) {
-        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW\n\x1b[0m");
         assert(false);
     }
 
@@ -105,7 +107,7 @@ void Window::initGLFW() {
     window_ = glfwCreateWindow(windowData_.width, windowData_.height, windowData_.title, NULL, NULL);
 
     if (!window_) {
-        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW Window\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1m[GLFW ERROR]Failed to initialize GLFW Window\x1b[0m\n");
         assert(false);
     }
 
@@ -116,11 +118,11 @@ void Window::initGLFW() {
 
 void Window::initGLAD() {
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        PRISM_CORE_WARN("\x1b[31;1mFailed to initialize OpenGL context\n\x1b[0m\n");
+        PRISM_CORE_WARN("\x1b[31;1mFailed to initialize OpenGL context\n\x1b[0m");
         assert(false);
     } else {
         std::stringstream ss;
-        ss << "\x1b[32;1m[GLAD] " << glGetString(GL_VERSION) << " \x1b[0m\n";
+        ss << "\x1b[32;1m[GLAD] " << glGetString(GL_VERSION) << " \x1b[0m";
         PRISM_CORE_INFO(ss.str());
     }
 }
@@ -145,8 +147,8 @@ Window::~Window() {
 }
 
 void Window::shutdown() {
-    glfwDestroyWindow(window_);
     glfwTerminate();
+    glfwDestroyWindow(window_);
 }
 
 

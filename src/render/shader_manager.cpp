@@ -5,7 +5,7 @@ namespace prism {
 ShaderManager::ShaderManager(std::vector<CreateShaderInfo> infos)
     : createShaderInfos_(infos) 
 {
-
+    CompileShader();
 }
 
 ShaderManager::~ShaderManager() {
@@ -21,12 +21,26 @@ void ShaderManager::CompileShader() {
         shaders_.push_back(shader);
 
         switch (info.type) {
-            case ShaderType::TOOL:
+            case ShaderType::HAS_TEX: {
+                hasTexShader_ = shader;
+                break;
+            }
+            case ShaderType::WITH_TEX: {
+                withTexShader_ = shader;
+                break;
+            }
+            case ShaderType::SKYBOX: {
+                skyboxShader_ = shader;
+                break;
+            }
+            case ShaderType::TOOL: {
                 toolShaders_[info.name] = shader;
                 break;
-            case ShaderType::SPECIAL:
+            }
+            case ShaderType::SPECIAL: {
                 specialShaders_[info.name] = shader;
                 break;
+            }
             default:
                 break;
         }
@@ -39,8 +53,11 @@ std::shared_ptr<Shader> ShaderManager::getPlainShader() const {
 std::shared_ptr<Shader> ShaderManager::getHasTexShader() const {
     return hasTexShader_;
 }
-std::shared_ptr<Shader> ShaderManager::getWidthTexShader() const {
+std::shared_ptr<Shader> ShaderManager::getWithTexShader() const {
     return withTexShader_;
+}
+std::shared_ptr<Shader> ShaderManager::getSkyboxShader() const {
+    return skyboxShader_;
 }
 const std::unordered_map<std::string, std::shared_ptr<Shader>>& ShaderManager::getToolShaders() const {
     return toolShaders_;

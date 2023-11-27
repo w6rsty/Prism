@@ -27,7 +27,7 @@ private:
     static float vertices[4 * 8];
     static unsigned int indices[3 * 2];
 public:
-    Plane();
+    Plane(float scale = 1.0f);
     void onRender(Shader& shader) override;
 };
 

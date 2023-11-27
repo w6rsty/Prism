@@ -30,6 +30,7 @@ public:
     void SetEventCallback(EventCallbackFn callback);
     inline int GetWidth() const { return windowData_.width; }
     inline int GetHeight() const { return windowData_.height; }
+    inline GLFWwindow* GetWindowPtr() const { return window_; }
 
     static Window* Create(const WindowProps& data = DefaultWindowProps);
 private:

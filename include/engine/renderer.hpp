@@ -19,7 +19,6 @@
 #include "render/vertex_array.hpp"
 #include "render/index_buffer.hpp"
 #include "render/vertex_buffer.hpp"
-#include "render/shader_program.hpp"
 #include "render/drawable_manager.hpp"
 
 #define UINEXT ImGui::SameLine();

@@ -17,7 +17,13 @@ unsigned int Plane::indices[3 * 2] = {
     0, 2, 3
 };
 
-Plane::Plane() {
+Plane::Plane(float scale) {
+    if (scale != 1.0f) {
+        for (int i = 0; i < 36; i++) {
+            vertices[i * 8 + 6] *= scale;
+            vertices[i * 8 + 7] *= scale;
+        }
+    }
     vao_ = std::make_unique<VertexArray>();
     vao_->Bind();
     vbo_ = std::make_unique<VertexBuffer>(vertices, sizeof(float) * 4 * 8);
@@ -83,7 +89,7 @@ float Cube::vertices[8 * 36] = {
 };
 
 Cube::Cube() {
-        vao_ = std::make_unique<VertexArray>();
+    vao_ = std::make_unique<VertexArray>();
     vao_->Bind();
     vbo_ = std::make_unique<VertexBuffer>(vertices, sizeof(float) * 8 * 36);
     VertexBufferLayout layout;

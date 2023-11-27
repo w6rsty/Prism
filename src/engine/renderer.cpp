@@ -10,7 +10,6 @@
 #include "render/index_buffer.hpp"
 #include "render/vertex_array.hpp"
 #include "render/vertex_buffer.hpp"
-#include "render/shader_program.hpp"
 
 #define planeVertexPath "D:/home/Prism/resources/shader/plane_vertex.glsl"
 #define planeFragPath "D:/home/Prism/resources/shader/plane_frag.glsl"

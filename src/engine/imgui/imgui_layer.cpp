@@ -14,12 +14,15 @@ namespace prism {
 ImGuiLayer::ImGuiLayer()
     : Layer("ImGui Layer")
 {
+    PRISM_CORE_INFO("[Loading ImGuiLayer]");
     Window& window = Application::GetInstance()->GetWindow();
     ui_ = std::make_unique<UI>(window.GetWidth(), window.GetHeight(), &delta_time_);
 }
 
 ImGuiLayer::~ImGuiLayer() {
-
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void ImGuiLayer::OnAttach() {
@@ -76,6 +79,11 @@ void ImGuiLayer::OnUpdate() {
 
         ui_->imguiLayout();
         app->GetWindow().SetSync(ui_->enable_vsync);
+        if (ui_->show_frame_) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

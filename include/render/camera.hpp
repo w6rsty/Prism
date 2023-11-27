@@ -17,7 +17,7 @@ enum Camera_Movement {
 // Default camera values
 #define YAW          -90.0f
 #define PITCH         0.0f
-#define SPEED         2.0f
+#define SPEED         5.0f
 #define SENSITIVITY   0.1f
 #define ZOOM          45.0f
 

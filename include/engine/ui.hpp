@@ -13,6 +13,7 @@ private:
     bool show_demo_ = false;
     bool show_debug_ = false;
 public:
+    bool show_frame_ = false;
     bool enable_vsync = true;
     UI(int width, int height, float* time);
     ~UI();

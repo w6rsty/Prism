@@ -8,9 +8,7 @@
 namespace prism {
 
 class SkyBox final : public Drawable {
-private:
-    unsigned int loadCubemap(std::vector<std::string>& faces);
-    
+private:    
     std::unique_ptr<VertexArray> vao_;
     std::unique_ptr<VertexBuffer> vbo_;
 
@@ -18,7 +16,7 @@ private:
     
     static float vertices[108];
 public:
-    SkyBox(std::vector<std::string>& faces);
+    SkyBox();
     void onRender(Shader& shader) override;
 };
 

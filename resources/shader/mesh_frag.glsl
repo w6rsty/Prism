@@ -32,10 +32,10 @@ void main(void) {
     // 计算镜面反射
     vec3 viewDir = normalize(view_pos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // 调整反射光的强度，32.0 是一个参数，你可以根据需要调整
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0);
 
-    vec3 specular = light.color * spec * tex_specular; // 乘以镜面贴图
-    vec3 result = ambeint + diffuse + specular; // 将镜面反射加入最终结果
+    vec3 specular = 0.4 * light.color * spec * tex_specular;
+    vec3 result = ambeint + diffuse + specular;
 
     FragColor = vec4(result, 1.0);
 }

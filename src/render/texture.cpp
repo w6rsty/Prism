@@ -51,4 +51,40 @@ void Texture::Bind(unsigned int slot) const {
 }
 void Texture::Unbind() const {
     GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+    GLCall(glActiveTexture(GL_TEXTURE0));
+}
+
+SkyBoxTexture::SkyBoxTexture(std::vector<std::string>& faces, bool flip) {
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++) {
+        stbi_set_flip_vertically_on_load(flip);
+        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        } else {
+            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+void SkyBoxTexture::Bind(unsigned int slot) const {
+    GLCall(glActiveTexture(GL_TEXTURE0 + slot));
+    GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id));
+}
+void SkyBoxTexture::Unbind() const  {
+    GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
+    GLCall(glActiveTexture(GL_TEXTURE0));
+}
+
+SkyBoxTexture::~SkyBoxTexture() {
+    glDeleteTextures(1, &texture_id);
 }

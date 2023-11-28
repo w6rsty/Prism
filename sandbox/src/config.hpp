@@ -9,7 +9,7 @@
 static const char* modelNanosuitPath = "D:/home/Prism/resources/model/nanosuit/nanosuit.obj";
 static const char* modelBackpackPath = "D:/home/Prism/resources/model/backpack/backpack.obj";
 
-static Camera* camera = new Camera({0, 20, 10});
+static Camera* camera = new Camera({0, 5, 10});
 static float xpos = (float)prism::WIDTH / 2;
 static float ypos = (float)prism::HEIGHT / 2; 
 static bool firstMosue = true;
@@ -23,11 +23,16 @@ static std::vector<std::string> faces {
     "D:/home/Prism/resources/skybox/top.jpg",
     "D:/home/Prism/resources/skybox/bottom.jpg",
     "D:/home/Prism/resources/skybox/front.jpg",
-    "D:/home/Prism/resources/skybox/back.jpg"
+    "D:/home/Prism/resources/skybox/back.jpg",
 };
 
 // Config shader and compile options
 static std::vector<prism::CreateShaderInfo> createShaderInfo = {
+    prism::CreateShaderInfo{
+        .vertexPath = prism::skyboxVertexPath,
+        .fragPath = prism::skyboxFragPath,
+        .type = prism::ShaderType::SKYBOX,
+    },
     prism::CreateShaderInfo{
         .vertexPath = prism::meshVertexPath,
         .fragPath = prism::meshFragPath,
@@ -37,11 +42,6 @@ static std::vector<prism::CreateShaderInfo> createShaderInfo = {
         .vertexPath = prism::withTexVertexPath,
         .fragPath = prism::withTexFragPath,
         .type = prism::ShaderType::WITH_TEX,
-    },
-    prism::CreateShaderInfo{
-        .vertexPath = prism::skyboxVertexPath,
-        .fragPath = prism::skyboxFragPath,
-        .type = prism::ShaderType::SKYBOX,
     },
 };
 

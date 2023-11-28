@@ -10,44 +10,37 @@
 #include <memory>
 #include <string>
 
-static glm::mat4 backpackModelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(2, 2, 0));
-static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
+static glm::mat4 backpackModelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 2, 0));
+static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f));
 static glm::mat4 skyboxTransfrom = glm::mat4(1.0f);
 
 void startupSystem(pecs::Commands& command) {
     command.Spawn<Player, RenderInfo>(
         Player{"w6rsty"},
         RenderInfo{
-            .model = &movement,
-            .drawable = std::make_shared<prism::Model>(modelNanosuitPath, true),
+            .model = &backpackModelTransform,
+            .drawable = std::make_shared<prism::Model>(modelBackpackPath, false),
             .shaderType = prism::ShaderType::HAS_TEX,
         }
     );
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &groundModelTransform,
-            .drawable = std::make_shared<prism::Plane>(2.0f),
+            .drawable = std::make_shared<prism::Plane>(),
             .shaderType = prism::ShaderType::WITH_TEX
         }
     );
-    command.Spawn<RenderInfo>(
-        RenderInfo{
-            .model = &skyboxTransfrom,
-            .drawable = std::make_shared<prism::SkyBox>(faces),
-            .shaderType = prism::ShaderType::SKYBOX
-        }
-    );
-
     command.SetResource(std::shared_ptr<Camera>(camera));
     command.SetResource(std::make_shared<prism::ShaderManager>(createShaderInfo));
     command.SetResource(Ticker{});
-
+    command.SetResource(std::make_shared<prism::SkyBox>());
+    command.SetResource(std::make_shared<SkyBoxTexture>(faces, false));
 
     int bufw = 512, bufh = 512;
     unsigned char* buffer = new unsigned char[bufw * bufh * 3];
-    createCheckboardTexture(buffer, bufw, bufh, 128); 
+    createBerlinNoiseTexture(buffer, bufw, bufh, 16); 
     command.SetResource(std::make_shared<Texture>(bufw, bufh, buffer));
-    delete[] buffer;
+
 }
 
 class RenderLayer final : public prism::Layer {

@@ -8,8 +8,8 @@ struct WindowProps {
     int height;
 };
 
-static const int WIDTH = 2560;
-static const int HEIGHT = 1440;
+static const int WIDTH = 1920;
+static const int HEIGHT = 1080;
 static const float ASPECT = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
 
 static const WindowProps DefaultWindowProps { "Prism Engine", WIDTH, HEIGHT }; 

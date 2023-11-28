@@ -9,5 +9,6 @@ uniform mat4 view_matrix;
 void main()
 {
     TexCoords = aPosition;
-    gl_Position = proj_matrix * view_matrix * vec4(aPosition, 1.0);
+    vec4 pos = proj_matrix * view_matrix * vec4(aPosition, 1.0);
+    gl_Position = pos.xyww;
 }

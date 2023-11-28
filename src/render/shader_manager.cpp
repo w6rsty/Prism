@@ -1,4 +1,5 @@
 #include "render/shader_manager.hpp"
+#include "geo/skybox.hpp"
 
 namespace prism {
 
@@ -18,32 +19,24 @@ ShaderManager::~ShaderManager() {
 void ShaderManager::CompileShader() {
     for (const auto& info : createShaderInfos_) {
         auto shader = std::make_shared<Shader>(info.vertexPath, info.fragPath);
-        shaders_.push_back(shader);
-
-        switch (info.type) {
-            case ShaderType::HAS_TEX: {
-                hasTexShader_ = shader;
-                break;
-            }
-            case ShaderType::WITH_TEX: {
-                withTexShader_ = shader;
-                break;
-            }
-            case ShaderType::SKYBOX: {
-                skyboxShader_ = shader;
-                break;
-            }
-            case ShaderType::TOOL: {
-                toolShaders_[info.name] = shader;
-                break;
-            }
-            case ShaderType::SPECIAL: {
-                specialShaders_[info.name] = shader;
-                break;
-            }
-            default:
-                break;
+        if (info.type == ShaderType::SKYBOX) {
+            skyboxShader_ = shader;
+            continue;
         }
+        if (info.type == ShaderType::HAS_TEX) {
+            hasTexShader_ = shader;
+        }
+        if (info.type == ShaderType::WITH_TEX) {
+            withTexShader_ = shader;
+        }
+        if (info.type == ShaderType::TOOL) {
+            toolShaders_[info.name] = shader;
+        }
+        if (info.type == ShaderType::SPECIAL) {
+            specialShaders_[info.name] = shader;
+        }
+        
+        shaders_.push_back(shader);
     }
 }
 

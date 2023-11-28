@@ -6,21 +6,30 @@
 #include <random>
 
 
-class Texture final {
-private:
+class Texture {
+protected:
     unsigned int texture_id;
+    bool flip_;
+    Texture() {}
+private:
     std::string file_path;
     unsigned char* data;
     int width, height, BPP;
-    bool flip_;
 public:
     Texture(const std::string& filePath, bool flip = true);
     Texture(int width, int height, const unsigned char* data);
-    ~Texture();
-    void Bind(unsigned int slot = 0) const;
-    void Unbind() const;
-    inline static void Reset() { glActiveTexture(GL_TEXTURE0); }
+    virtual ~Texture();
+    virtual void Bind(unsigned int slot = 0) const;
+    virtual void Unbind() const;
 };
+
+class SkyBoxTexture final : public Texture {
+public:
+    SkyBoxTexture(std::vector<std::string>& faces, bool flip);
+    void Bind(unsigned int slot = 0) const override;
+    void Unbind() const override;
+    ~SkyBoxTexture();
+ };
 
 inline void createCheckboardTexture(unsigned char* textureBuffer, int width, int height, int tileSize) {
     for (int i = 0; i < height; ++i) {

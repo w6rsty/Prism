@@ -156,8 +156,8 @@ void Pyramid::onRender(Shader& shader) {
 Sphere::Sphere(int precision) {
     numOfVertices = (precision + 1) * (precision + 1);
     numOfIndices = precision * precision * 6;
-    indices.reserve(numOfIndices);
-    vertices = new float[numOfVertices * (3 + 2 + 3)];
+    indices.resize(numOfIndices);
+    vertices = new float[numOfVertices * 8];
 
     for (int i = 0; i <= precision; i++) {
         for (int j = 0; j <= precision; j++) {
@@ -166,12 +166,15 @@ Sphere::Sphere(int precision) {
             float z = (float)sin(glm::radians(j * 360.0f / precision)) * (float)abs(cos(asin(y)));
 
             int index = i * (precision + 1) + j;
+            // position
             vertices[index * 8 + 0] = x; 
             vertices[index * 8 + 1] = y; 
             vertices[index * 8 + 2] = z; 
+            // normal
             vertices[index * 8 + 3] = x; 
             vertices[index * 8 + 4] = y; 
             vertices[index * 8 + 5] = z; 
+            // texture uv
             vertices[index * 8 + 6] = (float)i / precision; 
             vertices[index * 8 + 7] = (float)j / precision; 
         }
@@ -179,8 +182,10 @@ Sphere::Sphere(int precision) {
 
     for (int i = 0; i < precision; i++) {
         for (int j = 0; j < precision; j++) {
-            indices[6 * (i * precision + j) + 0] = i * (precision + 1) + j;
-            indices[6 * (i * precision + j) + 1] = i * (precision + 1) + j + 1;
+            size_t index = 6 * (i * precision + j) + 0;
+            indices[index] = i * (precision + 1) + j;
+            index = 6 * (i * precision + j) + 1;
+            indices[index] = i * (precision + 1) + j + 1;
             indices[6 * (i * precision + j) + 2] = (i + 1) * (precision + 1) + j;
             indices[6 * (i * precision + j) + 3] = i * (precision + 1) + j + 1;
             indices[6 * (i * precision + j) + 4] = (i + 1) * (precision + 1) + j + 1;
@@ -198,7 +203,6 @@ Sphere::Sphere(int precision) {
     layout.push_float(2);
     vao_->addBuffer(*vbo_, layout);
     vao_->Unbind();
-    delete [] vertices;
     indices.clear();
 }
 
@@ -210,5 +214,78 @@ void Sphere::onRender(Shader& shader) {
     shader.Unbind();
 }
 
+Sphere::~Sphere() {
+    delete [] vertices;
+    vertices = nullptr;
+    indices.clear();
+}
+
+Torus::Torus(float precision, float inner, float outer) {
+    numOfVertices = (precision + 1) * (precision + 1);
+    numOfIndices = precision * precision * 6;
+    indices.resize(numOfIndices);
+    vertices = new float[numOfVertices * 8];
+
+    for (int i = 0; i <= precision; i++) {
+        for (int j = 0; j <= precision; j++) {
+            float s = (float)cos(glm::radians(i * 360.0f / precision)) * inner + outer;
+            float y = (float)sin(glm::radians(i * 360.0f / precision)) * inner;
+            float x = (float)cos(glm::radians(j * 360.0f / precision)) * s;
+            float z = (float)sin(glm::radians(j * 360.0f / precision)) * s;
+
+            int index = i * (precision + 1) + j;
+            // position
+            vertices[index * 8 + 0] = x; 
+            vertices[index * 8 + 1] = y; 
+            vertices[index * 8 + 2] = z; 
+            // normal
+            vertices[index * 8 + 3] = x; 
+            vertices[index * 8 + 4] = y; 
+            vertices[index * 8 + 5] = z; 
+            // texture uv
+            vertices[index * 8 + 6] = (float)i / precision; 
+            vertices[index * 8 + 7] = (float)j / precision; 
+        }
+    }
+
+    for (int i = 0; i < precision; i++) {
+        for (int j = 0; j < precision; j++) {
+            size_t index = 6 * (i * precision + j) + 0;
+            indices[index] = i * (precision + 1) + j;
+            index = 6 * (i * precision + j) + 1;
+            indices[index] = i * (precision + 1) + j + 1;
+            indices[6 * (i * precision + j) + 2] = (i + 1) * (precision + 1) + j;
+            indices[6 * (i * precision + j) + 3] = i * (precision + 1) + j + 1;
+            indices[6 * (i * precision + j) + 4] = (i + 1) * (precision + 1) + j + 1;
+            indices[6 * (i * precision + j) + 5] = (i + 1) * (precision + 1) + j;
+        }
+    }
+    vao_ = std::make_unique<VertexArray>();
+    vao_->Bind();
+    vbo_ = std::make_unique<VertexBuffer>(vertices, sizeof(float) * 8 * numOfVertices);
+    ibo_ = std::make_unique<IndexBuffer>(indices.data(), numOfIndices);
+    VertexBufferLayout layout;
+    layout.push_float(3);
+    layout.push_float(3);
+    layout.push_float(2);
+    vao_->addBuffer(*vbo_, layout);
+    vao_->Unbind();
+    indices.clear();
+}
+
+
+Torus::~Torus() {
+    delete [] vertices;
+    vertices = nullptr;
+    indices.clear();
+}
+
+void Torus::onRender(Shader& shader) {
+    shader.Bind();
+    vao_->Bind();
+    glDrawElements(GL_TRIANGLES, numOfIndices, GL_UNSIGNED_INT, 0);
+    vao_->Unbind();
+    shader.Unbind();
+}
 
 } // namespace prism

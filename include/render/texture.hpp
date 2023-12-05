@@ -68,3 +68,15 @@ inline void createBerlinNoiseTexture(unsigned char* textureBuffer, int width, in
         }
     }
 }
+
+inline void createPureColorTexture(unsigned char* textureBuffer, int width, int height, int r, int g, int b) {
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            int index = (i * width + j) * 3; // 每个像素3个通道（R,G,B）
+
+            textureBuffer[index] = r / 255;
+            textureBuffer[index + 1] = g / 255;
+            textureBuffer[index + 2] = b / 255;
+        }
+    }
+}

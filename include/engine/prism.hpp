@@ -14,3 +14,6 @@
 #include "render/model.hpp"
 #include "render/shader.hpp"
 #include "render/shader_manager.hpp"
+
+#include "anim/anim.hpp"
+#include "anim/anim_timer.hpp"

@@ -29,7 +29,7 @@ inline void updateSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::R
     for (const auto& entity : entities) {
         auto& target = queryer.Get<RenderInfo>(entity);
         target.proj = glm::perspective(glm::radians(camera.Zoom), prism::ASPECT, 0.1f, 1000.0f);
-        target.view = glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(1, 0, 0)) * camera.GetViewMatrix();
+        target.view = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(1, 0, 0)) *  camera.GetViewMatrix();
         // target.view = camera.GetViewMatrix();
     }
 }
@@ -45,8 +45,8 @@ inline void renderSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::R
     // pass light info
     for (const auto& shader : shaders) {
         shader->Bind();
-        shader->setUniform3f("light.pos", 4, 5, 3);
-        shader->setUniform3f("light.color", 1, 1, 1);
+        shader->setUniform3f("light.pos", lightPos[0], lightPos[1], lightPos[2]);
+        shader->setUniform3f("light.color", lightColor[0], lightColor[1], lightColor[2]);
         shader->setUniform3f("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
     }
 
@@ -84,9 +84,9 @@ inline void renderSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::R
     shader.Bind();
     skyboxTexture.Bind(0);
     shader.setUniform1i("skybox", 0);
-    auto skyboxView = glm::mat4(glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(1, 0, 0)) * camera.GetViewMatrix()));
+    auto skyboxView = glm::mat4(glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(1, 0, 0)) * camera.GetViewMatrix()));
     shader.setUniformMat4f("view_matrix", skyboxView);
-    auto projection =glm::perspective(glm::radians(camera.Zoom), prism::ASPECT, 0.1f, 1000.0f);
+    auto projection = glm::perspective(glm::radians(camera.Zoom), prism::ASPECT, 0.1f, 1000.0f);
     shader.setUniformMat4f("proj_matrix", projection);
     skybox.onRender(shader);
     skyboxTexture.Unbind();

@@ -36,6 +36,6 @@ void main(void) {
     vec3 R = reflect(FragPos - viewPos, norm);
     vec3 ambient = texture(skybox, R).rgb;
 
-    vec3 result = (0.5 * ambient + 0.5 * diffuse + 0.2 * specular) * texColor;
+    vec3 result = (0.2 * ambient + 0.5 * diffuse + 0.2 * specular) * texColor;
     FragColor = vec4(result, 1.0);
 }

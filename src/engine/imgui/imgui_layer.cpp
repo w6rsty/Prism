@@ -7,7 +7,11 @@
 #include "engine/event/key_event.hpp"
 #include "engine/event/mouse_event.hpp"
 #include "engine/log.hpp"
-#include "GLFW/glfw3.h"
+
+
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_opengl3_loader.h"
 
 namespace prism {
 

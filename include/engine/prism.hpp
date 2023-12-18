@@ -16,4 +16,4 @@
 #include "render/shader_manager.hpp"
 
 #include "anim/anim.hpp"
-#include "anim/anim_timer.hpp"
+#include "anim/anim_manager.hpp"

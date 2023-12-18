@@ -15,7 +15,6 @@ struct Light {
 
 uniform Light light;
 uniform vec3 viewPos;
-uniform samplerCube skybox;
 
 void main(void) {
     vec3 texColor = texture(tex, TexCoord).rgb;
@@ -33,9 +32,8 @@ void main(void) {
     // Calculate specular component
     vec3 specular = light.color * spec;
 
-    vec3 R = reflect(FragPos - viewPos, norm);
-    vec3 ambient = texture(skybox, R).rgb;
+    vec3 ambient = light.color * texColor;
 
-    vec3 result = (0.2 * ambient + 0.5 * diffuse + 0.2 * specular) * texColor;
+    vec3 result = (0.4 * ambient + 0.8 * diffuse + 0.2 * specular) * texColor;
     FragColor = vec4(result, 1.0);
 }

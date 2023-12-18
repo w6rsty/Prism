@@ -2,27 +2,30 @@
 
 #include "config/config.hpp"
 #include "engine/prism.hpp"
+#include "glm/fwd.hpp"
 #include "render/camera.hpp"
 #include "render/vertex_array.hpp"
+#include <memory>
 
-static Camera* camera = new Camera({0, 15, 15});
+static Camera* camera = new Camera({0, 20, 20});
 static float xpos = (float)prism::WIDTH / 2;
 static float ypos = (float)prism::HEIGHT / 2; 
 static bool firstMosue = true;
 static GLFWwindow* window = nullptr;
 static std::pair<float, float> mousePosition = std::make_pair(0, 0);
+static const float CameraRoation = 40.0f;
 
 // Model path
 static const char* modelNanosuitPath = "D:/home/Prism/resources/model/nanosuit/nanosuit.obj";
 static const char* modelBackpackPath = "D:/home/Prism/resources/model/backpack/backpack.obj";
+static const char* modelMonkeyPath = "D:/home/Prism/resources/model/monkey/untitled.obj";
 
-static glm::vec3 ModelInitPostion = glm::vec3(0.0f, 0.0f, 0.0f);
-static glm::mat4 ModelInitMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-static glm::mat4 ModelTransform = glm::mat4(1.0f) * ModelInitMat;
+static glm::vec3 ModelPosition = glm::vec3(0.0f, 1.0f, 0.0f);
+static glm::mat4 ModelTransform = glm::translate(glm::mat4(1.5f), ModelPosition);
+static glm::vec3 ModelOrientation = glm::vec3(0.0f, 0.0f, 1.0f);
+static float ModelSpeed = 15.0f;
 
-static glm::vec3 LastClickPosition = ModelInitPostion;
-
-static float lightPos[3] { 2, 5, 15 };
+static glm::vec3& lightPos = camera->Position;
 static float lightColor[3] { 1, 1, 1 };
 
 // skybox faces texture path
@@ -36,8 +39,10 @@ static std::vector<std::string> faces {
 };
 static glm::mat4 skyboxTransfrom = glm::mat4(1.0f);
 
-static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
 
+static glm::mat4 backWallTransform = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)), glm::vec3(0, 0, -20.0f));
+;
 // Resigter shader compile info
 static std::vector<prism::CreateShaderInfo> createShaderInfo = {
     prism::CreateShaderInfo{
@@ -56,6 +61,8 @@ static std::vector<prism::CreateShaderInfo> createShaderInfo = {
         .type = prism::ShaderType::WITH_TEX,
     },
 };
+
+static std::vector<std::shared_ptr<Texture>> TextureBase;
 
 // camera movement
 inline void handleGenaralKeyboardInput(float deltaTime) {

@@ -23,6 +23,7 @@ Texture::Texture(const std::string& filePath, bool flip)
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        stbi_image_free(data);
     }
 }
 
@@ -41,7 +42,6 @@ Texture::Texture(int width, int height, const unsigned char* data) {
 }
 
 Texture::~Texture() {
-    if (data) stbi_image_free(data);
     GLCall(glDeleteTextures(1, &texture_id));
 }
 
@@ -67,7 +67,6 @@ SkyBoxTexture::SkyBoxTexture(std::vector<std::string>& faces, bool flip) {
             stbi_image_free(data);
         } else {
             std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-            stbi_image_free(data);
         }
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

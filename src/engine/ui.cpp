@@ -2,8 +2,7 @@
 
 #include "GLFW/glfw3.h"
 #include "imgui.h"
-#include "engine/renderer.hpp"
-#include "render/shader.hpp"
+
 #include "config/config.hpp"
 
 namespace prism {

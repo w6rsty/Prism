@@ -7,8 +7,6 @@
 #include <memory>
 
 #include "engine/event/event.hpp"
-#include "engine/log.hpp"
-#include <iostream>
 
 namespace prism {
 

@@ -1,10 +1,6 @@
 #pragma once
 
-#include "renderer.hpp"
-
 namespace prism {
-
-class Renderer;
 
 class UI {
 private:

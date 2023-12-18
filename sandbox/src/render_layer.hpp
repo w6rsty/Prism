@@ -1,7 +1,7 @@
 #pragma once
 
 #include "anim/anim.hpp"
-#include "anim/anim_timer.hpp"
+#include "anim/anim_manager.hpp"
 #include "engine/log.hpp"
 #include "pecs.hpp"
 #include "engine/prism.hpp"
@@ -10,7 +10,6 @@
 #include "systems.hpp"
 
 #include <memory>
-#include <stack>
 #include <string>
 
 class RenderLayer final : public prism::Layer {
@@ -19,8 +18,7 @@ private:
     float deltaTime_;
     float lastTime_;
     prism::anim::Translation* translatonAnim_ = nullptr;
-
-    prism::anim::AnimationTimerManager timerManager_;
+    prism::anim::AnimationManager animManager_;
 
     prism::MouseMovedEvent mouseMovedEvent = prism::MouseMovedEvent(0, 0);
 public:
@@ -30,12 +28,6 @@ public:
         world.AddSystem(updateTickerSystem);
         world.AddSystem(updateSystem);
         world.AddSystem(renderSystem);
-        PRISM_INFO("Loading resources...");
-
-        // rotate anim         ID = 0
-        timerManager_.registerTimer(1.0f);
-        // translate anim      ID = 1
-        timerManager_.registerTimer(2.0f);
 
         PRISM_INFO("[PECS] World Startup!");
         world.Startup();
@@ -51,19 +43,7 @@ public:
         lastTime_ = currentTime;
 
         handleGenaralKeyboardInput(deltaTime_);
-        timerManager_.updateAll(deltaTime_);
-
-        if (translatonAnim_ != nullptr) {
-            prism::anim::AnimationTimer& translationTimer = timerManager_.GetTimer(1);
-            if (!translationTimer.isFinished()) {
-                float progress = translationTimer.getProgress();
-                glm::mat4 dMat = translatonAnim_->getMat(progress);
-                ModelTransform = dMat * ModelInitMat;
-            } else {
-                delete translatonAnim_;
-                translatonAnim_ = nullptr;
-            }
-        }
+        animManager_.Update(deltaTime_);
 
         world.Update();
     }
@@ -77,9 +57,7 @@ public:
     bool OnMouseButtonPressed(prism::MouseButtonPressedEvent& event) {
         if (event.GetMouseButton() == GLFW_MOUSE_BUTTON_1) {
             mousePosition = {mouseMovedEvent.GetX(), mouseMovedEvent.GetY()};
-            calculateClickProjectionPos(mousePosition, ModelInitMat, camera->Position);
-
-            translatonAnim_ = new prism::anim::Translation(2.0f, LastClickPosition, glm::vec3(0.0f, 0.0f, 0.0f), prism::anim::EaseInOut);  
+            calculateClickProjectionPos(mousePosition, glm::mat4(1.0f), camera->Position);
         }
         return false;
     }
@@ -93,11 +71,17 @@ public:
         glm::vec4 clipSpacePosition = glm::vec4(2.0f * mousePosition.first / prism::WIDTH - 1.0f, 1.0f - 2.0f * mousePosition.second / prism::HEIGHT, -1.0f, 1.0f);
         glm::vec4 viewPosition = glm::inverse(glm::perspective(glm::radians(camera->Zoom), prism::ASPECT, 0.1f, 1000.0f)) * clipSpacePosition;
         viewPosition = viewPosition / viewPosition.w;
-        glm::vec4 worldPosition = glm::inverse(glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(1, 0, 0)) * camera->GetViewMatrix()) * viewPosition;
+        glm::vec4 worldPosition = glm::inverse(glm::rotate(glm::mat4(1.0f), glm::radians(CameraRoation), glm::vec3(1, 0, 0)) * camera->GetViewMatrix()) * viewPosition;
         glm::vec3 rayDirection = glm::normalize(glm::vec3(worldPosition) - cameraPosition);
         float t = -cameraPosition.y / rayDirection.y;
         glm::vec3 intersection = cameraPosition + t * rayDirection;
-        LastClickPosition = intersection;
-        // ModelTransform = glm::translate(glm::mat4(1.0f), intersection) * ModelInit;
+        intersection.y = ModelPosition.y;
+
+        if (ModelPosition != intersection) {
+            auto trans = new prism::anim::Translation(0.5f, ModelPosition, intersection, prism::anim::Linear);
+            trans->setSpeed(ModelSpeed);
+            animManager_.RegisterAnimation(trans, &ModelTransform);
+            ModelPosition = intersection;
+        } 
     }
 };

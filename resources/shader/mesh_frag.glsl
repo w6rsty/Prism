@@ -21,7 +21,7 @@ uniform vec3 viewPos;
 void main(void) {
     vec3 tex_diffuse = texture(texture_diffuse1, TexCoord).rgb;
     vec3 tex_specular = texture(texture_specular1, TexCoord).rgb; // 添加镜面贴图
-    vec3 ambeint = 0.2 * tex_diffuse;
+    vec3 ambeint = 0.8 * tex_diffuse;
     vec3 view_pos = viewPos;
     vec3 norm = normalize(texture(texture_normal1, TexCoord).rgb);
     vec3 lightDir = normalize(light.pos - FragPos);
@@ -35,7 +35,7 @@ void main(void) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0);
 
     vec3 specular = 0.4 * light.color * spec * tex_specular;
-    vec3 result = ambeint + diffuse + specular;
+    vec3 result = ambeint + specular;
 
     FragColor = vec4(result, 1.0);
 }

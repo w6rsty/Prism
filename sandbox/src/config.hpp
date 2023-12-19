@@ -8,12 +8,12 @@
 #include <memory>
 
 static Camera* camera = new Camera({0, 20, 20});
+static float CameraRotation = 0.0f;
 static float xpos = (float)prism::WIDTH / 2;
 static float ypos = (float)prism::HEIGHT / 2; 
 static bool firstMosue = true;
 static GLFWwindow* window = nullptr;
 static std::pair<float, float> mousePosition = std::make_pair(0, 0);
-static const float CameraRoation = 40.0f;
 
 // Model path
 static const char* modelNanosuitPath = "D:/home/Prism/resources/model/nanosuit/nanosuit.obj";
@@ -25,8 +25,9 @@ static glm::mat4 ModelTransform = glm::translate(glm::mat4(1.5f), ModelPosition)
 static glm::vec3 ModelOrientation = glm::vec3(0.0f, 0.0f, 1.0f);
 static float ModelSpeed = 15.0f;
 
-static glm::vec3& lightPos = camera->Position;
-static float lightColor[3] { 1, 1, 1 };
+static glm::vec3 lightPos = glm::vec3(0, 40.0f, 0);
+static float lightColor[3] { 0.98f, 0.98f, 0.82f };
+// yellow 0.93f, 0.9f, 0.55f
 
 // skybox faces texture path
 static std::vector<std::string> faces {
@@ -41,8 +42,23 @@ static glm::mat4 skyboxTransfrom = glm::mat4(1.0f);
 
 static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
 
-static glm::mat4 backWallTransform = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)), glm::vec3(0, 0, -20.0f));
+static glm::mat4 backWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 20.0f, -20.0f)) 
+                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+                                   * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+
+static glm::mat4 leftWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(20.0f, 20.0f, 0)) 
+                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+                                   * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 0, 1));
+
+
+static glm::mat4 rightWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(-20.0f, 20.0f, 0)) 
+                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+                                   * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 0, 1));
 ;
+static glm::mat4 lightCubeTransform = glm::translate(glm::mat4(1.0f),lightPos);
+
+static bool isAnimating = false;
+
 // Resigter shader compile info
 static std::vector<prism::CreateShaderInfo> createShaderInfo = {
     prism::CreateShaderInfo{
@@ -83,5 +99,17 @@ inline void handleGenaralKeyboardInput(float deltaTime) {
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         camera->ProcessKeyboard(DOWN, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        camera->ProcessMouseMovement(0, -10);
+    }
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        camera->ProcessMouseMovement(0, 10);
+    }
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+        camera->ProcessMouseMovement(-10, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        camera->ProcessMouseMovement(10, 0);
     }
 }

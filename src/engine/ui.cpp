@@ -33,7 +33,7 @@ void UI::imguiDebugPanel() {
     ImGui::Text("FPS: %d", int(1.0f / getTime()));
     ImGui::Checkbox("VSync", &enable_vsync);
     ImGui::Checkbox("Frame Mode", &show_frame_);
-
+    
     ImGui::End();
 }
 

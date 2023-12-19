@@ -9,12 +9,12 @@
 namespace prism {
 
 enum class ShaderType {
-    PLAIN,
+    PLAIN = 0,
     WITH_TEX,
     HAS_TEX,
     SKYBOX,
-    TOOL,
-    SPECIAL
+    NAMED,
+    SHADER_TYPE_COUNT,
 };
 
 struct CreateShaderInfo {
@@ -34,8 +34,7 @@ private:
     std::shared_ptr<Shader> hasTexShader_;
     std::shared_ptr<Shader> withTexShader_;
     std::shared_ptr<Shader> skyboxShader_;
-    std::unordered_map<std::string, std::shared_ptr<Shader>> toolShaders_;
-    std::unordered_map<std::string, std::shared_ptr<Shader>> specialShaders_;
+    std::unordered_map<std::string, std::shared_ptr<Shader>> namedShaders_;
 public:
     ShaderManager(std::vector<CreateShaderInfo> infos);
     ~ShaderManager();
@@ -44,8 +43,7 @@ public:
     std::shared_ptr<Shader> getHasTexShader() const;
     std::shared_ptr<Shader> getWithTexShader() const;
     std::shared_ptr<Shader> getSkyboxShader() const;
-    const std::unordered_map<std::string, std::shared_ptr<Shader>>& getToolShaders() const;
-    const std::unordered_map<std::string, std::shared_ptr<Shader>>& getSpecialShaders() const;
+    std::shared_ptr<Shader> getNamedShader(const std::string& name) const;
     inline std::vector<std::shared_ptr<Shader>>& getAllShaders() { return shaders_; }
 private:
     void CompileShader();

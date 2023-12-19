@@ -12,8 +12,7 @@ ShaderManager::ShaderManager(std::vector<CreateShaderInfo> infos)
 ShaderManager::~ShaderManager() {
     createShaderInfos_.clear();
     shaders_.clear();
-    toolShaders_.clear();
-    specialShaders_.clear();
+    namedShaders_.clear();
 }
 
 void ShaderManager::CompileShader() {
@@ -21,7 +20,7 @@ void ShaderManager::CompileShader() {
         auto shader = std::make_shared<Shader>(info.vertexPath, info.fragPath);
         if (info.type == ShaderType::SKYBOX) {
             skyboxShader_ = shader;
-            continue;
+            continue; // avoid push back to common shaders
         }
         if (info.type == ShaderType::HAS_TEX) {
             hasTexShader_ = shader;
@@ -29,13 +28,9 @@ void ShaderManager::CompileShader() {
         if (info.type == ShaderType::WITH_TEX) {
             withTexShader_ = shader;
         }
-        if (info.type == ShaderType::TOOL) {
-            toolShaders_[info.name] = shader;
+        if (info.type == ShaderType::NAMED) {
+            namedShaders_[info.name] = shader;
         }
-        if (info.type == ShaderType::SPECIAL) {
-            specialShaders_[info.name] = shader;
-        }
-        
         shaders_.push_back(shader);
     }
 }
@@ -52,11 +47,8 @@ std::shared_ptr<Shader> ShaderManager::getWithTexShader() const {
 std::shared_ptr<Shader> ShaderManager::getSkyboxShader() const {
     return skyboxShader_;
 }
-const std::unordered_map<std::string, std::shared_ptr<Shader>>& ShaderManager::getToolShaders() const {
-    return toolShaders_;
-}
-const std::unordered_map<std::string, std::shared_ptr<Shader>>& ShaderManager::getSpecialShaders() const {
-    return specialShaders_;
+std::shared_ptr<Shader> ShaderManager::getNamedShader(const std::string& name) const {
+    return namedShaders_.at(name);
 }
 
 } // namespace prism

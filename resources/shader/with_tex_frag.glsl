@@ -27,13 +27,13 @@ void main(void) {
     // Calculate specular reflection
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0);
 
     // Calculate specular component
     vec3 specular = light.color * spec;
 
     vec3 ambient = light.color * texColor;
 
-    vec3 result = (0.4 * ambient + 0.8 * diffuse + 0.2 * specular) * texColor;
+    vec3 result = (0.4 * ambient + 0.8 * diffuse + 0.15 * specular) * texColor;
     FragColor = vec4(result, 1.0);
 }

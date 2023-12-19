@@ -12,6 +12,12 @@
 #include <memory>
 #include <string>
 
+static int randInt(int max, int min = 0) {
+    static std::mt19937 engine(std::random_device{}());
+    std::uniform_int_distribution<int> distribution(min, max);
+    return distribution(engine);
+}
+
 class RenderLayer final : public prism::Layer {
 private:
     pecs::World world;
@@ -45,6 +51,10 @@ public:
         handleGenaralKeyboardInput(deltaTime_);
         animManager_.Update(deltaTime_);
 
+        if (!animManager_.isAnimating()) {
+            randomWalk();
+        }
+
         world.Update();
     }
 
@@ -71,17 +81,31 @@ public:
         glm::vec4 clipSpacePosition = glm::vec4(2.0f * mousePosition.first / prism::WIDTH - 1.0f, 1.0f - 2.0f * mousePosition.second / prism::HEIGHT, -1.0f, 1.0f);
         glm::vec4 viewPosition = glm::inverse(glm::perspective(glm::radians(camera->Zoom), prism::ASPECT, 0.1f, 1000.0f)) * clipSpacePosition;
         viewPosition = viewPosition / viewPosition.w;
-        glm::vec4 worldPosition = glm::inverse(glm::rotate(glm::mat4(1.0f), glm::radians(CameraRoation), glm::vec3(1, 0, 0)) * camera->GetViewMatrix()) * viewPosition;
+        glm::vec4 worldPosition = glm::inverse(glm::rotate(glm::mat4(1.0f), glm::radians(CameraRotation), glm::vec3(1, 0, 0)) * camera->GetViewMatrix()) * viewPosition;
         glm::vec3 rayDirection = glm::normalize(glm::vec3(worldPosition) - cameraPosition);
         float t = -cameraPosition.y / rayDirection.y;
         glm::vec3 intersection = cameraPosition + t * rayDirection;
         intersection.y = ModelPosition.y;
 
-        if (ModelPosition != intersection) {
-            auto trans = new prism::anim::Translation(0.5f, ModelPosition, intersection, prism::anim::Linear);
-            trans->setSpeed(ModelSpeed);
-            animManager_.RegisterAnimation(trans, &ModelTransform);
-            ModelPosition = intersection;
+        if (abs(intersection.x) < 20.0f && abs(intersection.z) < 20.0f) {
+            if (ModelPosition != intersection) {
+                auto trans = new prism::anim::Translation(0.5f, ModelPosition, intersection, prism::anim::Linear);
+                trans->setSpeed(ModelSpeed);
+                animManager_.RegisterAnimation(trans, &ModelTransform);
+                ModelPosition = intersection;
+            } 
+        }
+    }
+    void randomWalk() {
+        int randx = randInt(20, -20);
+        int randz = randInt(20, -20);
+        glm::vec3 randpos(randx, ModelPosition.y, randz);
+        // register a translation animation
+        if (ModelPosition != randpos) {
+                auto trans = new prism::anim::Translation(0.5f, ModelPosition, randpos, prism::anim::Linear);
+                trans->setSpeed(ModelSpeed);
+                animManager_.RegisterAnimation(trans, &ModelTransform);
+                ModelPosition = randpos;
         } 
     }
 };

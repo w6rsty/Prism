@@ -6,13 +6,22 @@
 
 #include "config.hpp"
 #include "systems.hpp"
-#include "render_info.hpp"
-#include "particle.hpp"
 
 #include <string>
 #include <memory>
 
+struct RenderInfo {
+    glm::mat4 proj = glm::mat4(1.0f);
+    glm::mat4 view  = glm::mat4(1.0f);
+    glm::mat4* model = nullptr;
+    glm::vec3* pos = nullptr;
 
+    std::shared_ptr<prism::Drawable> drawable;
+    prism::ShaderType shaderType;
+    
+    // Only for WITH_TEX use
+    unsigned int texIndex = 0;
+};
 
 inline void updateSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::Resources resources, pecs::Events& events) {
     auto entities = queryer.Query<RenderInfo>();
@@ -49,7 +58,7 @@ inline void renderSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::R
             shader.Bind();
             shader.setUniformMat4f("proj_matrix", target.proj);
             shader.setUniformMat4f("view_matrix", target.view);
-            glm::mat4 modelMat = *target.model;
+            glm::mat4 modelMat = glm::translate(glm::mat4(1.0f), *target.pos) * *target.model;
             target.drawable->onRender(shader);
             shader.setUniformMat4f("model_matrix", modelMat);
         } 
@@ -62,7 +71,7 @@ inline void renderSystem(pecs::Commands& command, pecs::Queryer queryer, pecs::R
             shader.setUniform1i("tex", 0);
             shader.setUniformMat4f("proj_matrix", target.proj);
             shader.setUniformMat4f("view_matrix", target.view);
-            glm::mat4 modelMat = *target.model;
+            glm::mat4 modelMat = glm::translate(glm::mat4(1.0f), *target.pos) * *target.model;
             shader.setUniformMat4f("model_matrix", modelMat);
             target.drawable->onRender(shader);
             skyboxTexture.Unbind();

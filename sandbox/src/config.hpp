@@ -2,13 +2,14 @@
 
 #include "config/config.hpp"
 #include "engine/prism.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "render/camera.hpp"
 #include "render/vertex_array.hpp"
 #include <memory>
 
-static Camera* camera = new Camera({0, 20, 20});
-static float CameraRotation = 0.0f;
+static Camera* camera = new Camera({0, 32, 32});
+static float CameraRotation = 45.0f;
 static float xpos = (float)prism::WIDTH / 2;
 static float ypos = (float)prism::HEIGHT / 2; 
 static bool firstMosue = true;
@@ -21,9 +22,12 @@ static const char* modelBackpackPath = "D:/home/Prism/resources/model/backpack/b
 static const char* modelMonkeyPath = "D:/home/Prism/resources/model/monkey/untitled.obj";
 
 static glm::vec3 ModelPosition = glm::vec3(0.0f, 1.0f, 0.0f);
-static glm::mat4 ModelTransform = glm::translate(glm::mat4(1.5f), ModelPosition);
-static glm::vec3 ModelOrientation = glm::vec3(0.0f, 0.0f, 1.0f);
+static glm::mat4 ModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.6f));
 static float ModelSpeed = 15.0f;
+
+static glm::vec3 EnemyPosition = glm::vec3(10.0f, 1.0f, 10.0f);
+static glm::mat4 EnemyTransform = glm::mat4(1.0f);
+static float EnemySpeed = 15.0f;
 
 static glm::vec3 lightPos = glm::vec3(0, 40.0f, 0);
 static float lightColor[3] { 0.98f, 0.98f, 0.82f };
@@ -41,21 +45,26 @@ static std::vector<std::string> faces {
 static glm::mat4 skyboxTransfrom = glm::mat4(1.0f);
 
 static glm::mat4 groundModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
+static glm::vec3 groundModelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
-static glm::mat4 backWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 20.0f, -20.0f)) 
-                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+static glm::mat4 backWallTransform =  glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
                                    * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+static glm::vec3 backWallPosition = glm::vec3(0.0f, 20.0f, -20.0f);
 
-static glm::mat4 leftWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(20.0f, 20.0f, 0)) 
-                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+static glm::mat4 leftWallTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
                                    * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 0, 1));
+static glm::vec3 leftWallPosition = glm::vec3(20.0f, 20.0f, 0.0f);
 
-
-static glm::mat4 rightWallTransform = glm::translate(glm::mat4(1.0f), glm::vec3(-20.0f, 20.0f, 0)) 
-                                   * glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
+static glm::mat4 rightWallTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) 
                                    * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 0, 1));
-;
-static glm::mat4 lightCubeTransform = glm::translate(glm::mat4(1.0f),lightPos);
+static glm::vec3 rightWallPosition = glm::vec3(-20.0f, 20.0f, 0.0f);
+
+static glm::mat4 lightCubeTransform = glm::mat4(1.0f);
+static glm::vec3 lightCubePosition = lightPos;
+
+static glm::mat4 HPModelTransform = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f, 0.5f, 1.0f))
+                                * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+static glm::vec3 HPModelPosition = glm::vec3(0.0f, 5.0f, -19.0f);
 
 static bool isAnimating = false;
 
@@ -101,15 +110,15 @@ inline void handleGenaralKeyboardInput(float deltaTime) {
         camera->ProcessKeyboard(DOWN, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-        camera->ProcessMouseMovement(0, -10);
+        camera->ProcessMouseMovement(0, -5);
     }
     if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-        camera->ProcessMouseMovement(0, 10);
+        camera->ProcessMouseMovement(0, 5);
     }
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-        camera->ProcessMouseMovement(-10, 0);
+        camera->ProcessMouseMovement(-5, 0);
     }
     if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-        camera->ProcessMouseMovement(10, 0);
+        camera->ProcessMouseMovement(5, 0);
     }
 }

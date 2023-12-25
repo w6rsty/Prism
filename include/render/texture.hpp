@@ -34,7 +34,7 @@ public:
 inline void createCheckboardTexture(unsigned char* textureBuffer, int width, int height, int tileSize) {
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            int cellColor = ((i / tileSize) + (j / tileSize)) % 2 == 0 ? 255 : 0;
+            int cellColor = ((i / tileSize) + (j / tileSize)) % 2 == 0 ? 230 : 150;
             int index = (i * width + j) * 3; // 每个像素3个通道（R,G,B）
 
             textureBuffer[index] = cellColor;

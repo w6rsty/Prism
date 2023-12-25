@@ -12,15 +12,27 @@ inline void startupSystem(pecs::Commands& command) {
         Player{"w6rsty"},
         RenderInfo{
             .model = &ModelTransform,
+            .pos = &ModelPosition,
+            .drawable = std::make_shared<prism::Model>(modelNanosuitPath),
+            .shaderType = prism::ShaderType::HAS_TEX,
+            .texIndex = 4,
+        }
+    );
+    command.Spawn<Enemy, RenderInfo>(
+        Enemy{"whoever"},
+        RenderInfo{
+            .model = &EnemyTransform,
+            .pos = &EnemyPosition,
             .drawable = std::make_shared<prism::Sphere>(),
             .shaderType = prism::ShaderType::WITH_TEX,
-            .texIndex = 1,
+            .texIndex = 6,
         }
     );
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &groundModelTransform,
-            .drawable = std::make_shared<prism::Plane>(0.5), // floor
+            .pos = &groundModelPosition,
+            .drawable = std::make_shared<prism::Plane>(), // floor
             .shaderType = prism::ShaderType::WITH_TEX,
             .texIndex = 0,
         }
@@ -28,6 +40,7 @@ inline void startupSystem(pecs::Commands& command) {
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &lightCubeTransform,
+            .pos = &lightPos,
             .drawable = std::make_shared<prism::Cube>(), // light cube
             .shaderType = prism::ShaderType::WITH_TEX,
             .texIndex = 3,
@@ -36,6 +49,7 @@ inline void startupSystem(pecs::Commands& command) {
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &backWallTransform,
+            .pos = &backWallPosition,
             .drawable = std::make_shared<prism::Plane>(),
             .shaderType = prism::ShaderType::WITH_TEX,
             .texIndex = 2,
@@ -44,6 +58,7 @@ inline void startupSystem(pecs::Commands& command) {
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &leftWallTransform,
+            .pos = &leftWallPosition,
             .drawable = std::make_shared<prism::Plane>(),
             .shaderType = prism::ShaderType::WITH_TEX,
             .texIndex = 4
@@ -52,9 +67,19 @@ inline void startupSystem(pecs::Commands& command) {
     command.Spawn<RenderInfo>(
         RenderInfo{
             .model = &rightWallTransform,
+            .pos = &rightWallPosition,
             .drawable = std::make_shared<prism::Plane>(),
             .shaderType = prism::ShaderType::WITH_TEX,
             .texIndex = 5
+        }
+    );
+    command.Spawn<RenderInfo>(
+        RenderInfo{
+            .model = &HPModelTransform,
+            .pos = &HPModelPosition,
+            .drawable = std::make_shared<prism::Plane>(),
+            .shaderType = prism::ShaderType::WITH_TEX,
+            .texIndex = 4
         }
     );
 
@@ -67,7 +92,7 @@ inline void startupSystem(pecs::Commands& command) {
     int bufw = 512, bufh = 512;
     unsigned char* buffer = new unsigned char[bufw * bufh * 3];
 
-    createCheckboardTexture(buffer, bufw, bufh, 16);
+    createCheckboardTexture(buffer, bufw, bufh, 64);
     TextureBase.push_back(std::make_shared<Texture>(bufw, bufh, buffer)); // texIndex 0
 
     createPureColorTexture(buffer, bufw, bufh, 255, 0, 255);
@@ -84,6 +109,9 @@ inline void startupSystem(pecs::Commands& command) {
 
     createPureColorTexture(buffer, bufw, bufh, 60, 179, 113);
     TextureBase.push_back(std::make_shared<Texture>(bufw, bufh, buffer)); // texIndex 5
+
+    createPureColorTexture(buffer, bufw, bufh, 20, 255, 127);
+    TextureBase.push_back(std::make_shared<Texture>(bufw, bufh, buffer)); // texIndex 6
 
     command.SetResource(&TextureBase);
 

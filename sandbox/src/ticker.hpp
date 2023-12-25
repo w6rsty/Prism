@@ -23,3 +23,12 @@ inline void echoTickerSystem(Commands& command, Queryer queryer, Resources resou
     auto& ticker = resources.Get<Ticker>();
     std::cout << "Tikcer: " << ticker.tick << std::endl;
 }
+
+struct Timer {
+    int tick = 0;
+    int max = 100;
+};
+
+inline void startupTimerSystem(Commands& command) {
+    command.SetResource(Timer{ .tick = 0, .max = 500 });
+}

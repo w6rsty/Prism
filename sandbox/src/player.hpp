@@ -5,3 +5,7 @@
 struct Player {
     std::string name;
 };
+
+struct Enemy {
+    std::string name;
+};

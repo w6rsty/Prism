@@ -8,6 +8,7 @@
 
 #include "config.hpp"
 #include "systems.hpp"
+#include "chase.hpp"
 
 #include <memory>
 #include <string>
@@ -26,12 +27,16 @@ private:
     prism::anim::Translation* translatonAnim_ = nullptr;
     prism::anim::AnimationManager animManager_;
 
+    float timer_ = 0;
+
     prism::MouseMovedEvent mouseMovedEvent = prism::MouseMovedEvent(0, 0);
 public:
     RenderLayer() : prism::Layer("Render Layer") {
         PRISM_INFO("[Loading RenderLayer]");
         world.AddStartupSystem(startupSystem);
+        world.AddStartupSystem(startupTimerSystem);
         world.AddSystem(updateTickerSystem);
+        world.AddSystem(chaseSystem);
         world.AddSystem(updateSystem);
         world.AddSystem(renderSystem);
 
@@ -51,9 +56,11 @@ public:
         handleGenaralKeyboardInput(deltaTime_);
         animManager_.Update(deltaTime_);
 
-        if (!animManager_.isAnimating()) {
+        timer_ += deltaTime_;
+        if (timer_ > 2.0f) {
             randomWalk();
-        }
+            timer_ = 0;
+        } 
 
         world.Update();
     }
@@ -86,26 +93,27 @@ public:
         float t = -cameraPosition.y / rayDirection.y;
         glm::vec3 intersection = cameraPosition + t * rayDirection;
         intersection.y = ModelPosition.y;
+        PRISM_WARN("{}, {}, {}", intersection.x, intersection.y, intersection.z);
 
         if (abs(intersection.x) < 20.0f && abs(intersection.z) < 20.0f) {
             if (ModelPosition != intersection) {
                 auto trans = new prism::anim::Translation(0.5f, ModelPosition, intersection, prism::anim::Linear);
                 trans->setSpeed(ModelSpeed);
-                animManager_.RegisterAnimation(trans, &ModelTransform);
-                ModelPosition = intersection;
+                animManager_.RegisterAnimation(trans, &ModelPosition);
+                // ModelPosition = intersection;
             } 
         }
     }
     void randomWalk() {
-        int randx = randInt(20, -20);
-        int randz = randInt(20, -20);
-        glm::vec3 randpos(randx, ModelPosition.y, randz);
+        int randx = randInt(19, -19);
+        int randz = randInt(19, -19);
+        glm::vec3 randpos(randx, EnemyPosition.y, randz);
         // register a translation animation
-        if (ModelPosition != randpos) {
-                auto trans = new prism::anim::Translation(0.5f, ModelPosition, randpos, prism::anim::Linear);
-                trans->setSpeed(ModelSpeed);
-                animManager_.RegisterAnimation(trans, &ModelTransform);
-                ModelPosition = randpos;
+        if (EnemyPosition != randpos) {
+            auto trans = new prism::anim::Translation(0.5f, EnemyPosition, randpos, prism::anim::Linear);
+            trans->setSpeed(EnemySpeed);
+            animManager_.RegisterAnimation(trans, &EnemyPosition);
+            // EnemyPosition = randpos;
         } 
     }
 };

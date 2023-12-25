@@ -12,14 +12,14 @@ private:
 
     struct AnimInfo {
         Animation* animation;
-        glm::mat4* target;
+        glm::vec3* position;
     };
 
     std::vector<AnimInfo> animInfos_;
 public:
     void Update(float deltaTime);
-    void RegisterAnimation(Animation* animation, glm::mat4* target);
-    inline bool isAnimating() const { return animInfos_.size() > 0; }
+    void RegisterAnimation(Animation* animation, glm::vec3 *position);
+    inline bool isAnimating() const { return animInfos_.size() > 1; }
 
     ~AnimationManager();
 };

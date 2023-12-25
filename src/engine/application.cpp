@@ -51,7 +51,7 @@ void Application::PushOverlay(Layer* layer) {
 }
 
 void Application::Run() {
-    while (running_) {
+    while (!glfwWindowShouldClose(window_->GetWindowPtr())) {
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -63,7 +63,7 @@ void Application::Run() {
 
         window_->OnUpdate();
     }
-    PRISM_CORE_ASSERT(!running_, "Application didn't stop");
+    // PRISM_CORE_ASSERT(!running_, "Application didn't stop");
 }
 
 

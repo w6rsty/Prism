@@ -2,3 +2,5 @@ build/
 .cache/
 resources/img
 resources/model/room
+3rdlibs
+!3rdlibs/CMakeLists.txt
